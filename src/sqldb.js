@@ -1,28 +1,54 @@
 const mysql = require('mysql2');
- 
+const db = require('../config').db
 // create the connection to database
 const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'eagleadmin',
-  database: 'eagletech',
-  password: 'eagle'
-});
+      host: db.DB_HOST,
+      user: db.DB_USER,
+      database: db.DB_DATABASE,
+      password: db.DB_PASS,
+  });
  
-// simple query
-// connection.query(
-//   'SELECT * FROM `table` WHERE `name` = "Page" AND `age` > 45',
-//   function(err, results, fields) {
-//     console.log(results); // results contains rows returned by server
-//     console.log(fields); // fields contains extra meta data about results, if available
-//   }
-// );
- 
-// // with placeholder
-// connection.query(
-//   'SELECT * FROM `table` WHERE `name` = ? AND `age` > ?',
-//   ['Page', 45],
-//   function(err, results) {
-//     console.log(results);
-//   }
-// );
-export {connection}
+connection.query(
+  `create table IF NOT EXISTS vendors (
+      Vendor_ID INT NOT NULL AUTO_INCREMENT,
+      Name varchar(100) NOT NULL,
+      MobNo1 varchar(50) NOT NULL,
+      MobNo2 varchar(50) ,
+      Address varchar(100) NOT NULL,
+      VERIFIED boolean NOT NULL,
+      City varchar(100) NOT NULL,
+      LastLogin datetime,
+      PRIMARY KEY (VENDOR_ID)
+  )`,
+  function (err, result) {
+      console.log(result);
+  }
+)
+connection.query(
+  `Create table IF NOT EXISTS products(
+      Product_ID INT NOT NULL auto_increment,
+      product_name varchar(100),
+      product_price varchar(100),
+      qty_kilos INT NOT NULL,
+      qty_dozen INT Not NULL,
+      expiry_date datetime not null,
+      product_image varchar(100),
+      discount float not null,
+      PRIMARY KEY (Product_ID)
+  )`,
+  function (err, result) {
+      console.log(result);
+  }
+)
+connection.query(
+  `Create table IF NOT EXISTs carts (
+      Vendor_ID INT NOT NULL,
+      Product_ID INT NOT Null,
+      product_qty INT NOT NULL, 
+      primary key(Product_ID, Vendor_ID)
+  )`,
+  function (err, result) {
+      console.log(err);
+  }
+)
+exports = module.exports = { connection }
