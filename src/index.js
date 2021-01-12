@@ -3,10 +3,10 @@ const path = require('path')
 const mysql = require('mysql2');
 
 const connection = mysql.createConnection({
-    host: 'localhost',
+    host: 'TestDB.subnet01121147.vcn01121147.oraclevcn.com',
     user: 'eagleadmin',
     database: 'eagletech',
-    password: 'Eagletech@1'
+    password: 'Eagletech@1',
 });
 // P0RI_FQ{kYJ|]&Wd
 connection.query(
@@ -51,7 +51,7 @@ connection.query(
         foreign key(Vendor_ID) references vendors(Vendor_ID)
     )`,
     function (err, result) {
-        console.log(result);
+        console.log(err);
     }
 )
 const app = express();
