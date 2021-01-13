@@ -2,12 +2,12 @@ const mysql = require('mysql2');
 const db = require('../config').db
 // create the connection to database
 const connection = mysql.createConnection({
-      host: db.DB_HOST,
-      user: db.DB_USER,
-      database: db.DB_DATABASE,
-      password: db.DB_PASS,
-  });
- 
+  host: db.DB_HOST,
+  user: db.DB_USER,
+  database: db.DB_DATABASE,
+  password: db.DB_PASS,
+});
+
 connection.query(
   `create table IF NOT EXISTS vendors (
       Vendor_ID INT NOT NULL AUTO_INCREMENT,
@@ -21,7 +21,7 @@ connection.query(
       PRIMARY KEY (VENDOR_ID)
   )`,
   function (err, result) {
-      console.log(result);
+    console.log(result || err);
   }
 )
 connection.query(
@@ -32,12 +32,12 @@ connection.query(
       qty_kilos INT NOT NULL,
       qty_dozen INT Not NULL,
       expiry_date datetime not null,
-      product_image varchar(100),
+      product_image VARCHAR(2083),
       discount float not null,
       PRIMARY KEY (Product_ID)
   )`,
   function (err, result) {
-      console.log(result);
+    console.log(result || err);
   }
 )
 connection.query(
@@ -48,7 +48,7 @@ connection.query(
       primary key(Product_ID, Vendor_ID)
   )`,
   function (err, result) {
-      console.log(err);
+    console.log(result || err);
   }
 )
 exports = module.exports = { connection }
