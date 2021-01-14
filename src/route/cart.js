@@ -7,7 +7,14 @@ route.post('/', (req, res) => {
         query,
         [req.body.Vendor_ID, req.body.Product_ID, req.body.product_qty],
         function (err, results) {
-            res.send(results || err)
+            if (results) {
+                res.send("product Updated successfully")
+            } else {
+                const resbody = {
+                    error: err
+                }
+                res.status(400).json(resbody)
+            }
         }
     )
 })
@@ -18,7 +25,7 @@ route.put('/', (req, res) => {
         query,
         [req.body.product_qty, req.body.Vendor_ID, req.body.Product_ID],
         function (err, results) {
-            res.send(results || err)
+            res.status(200).json(results)
         }
     )
 })
@@ -34,7 +41,7 @@ route.delete('/', (req, res) => {
 })
 
 
-route.get('/:id', (req, res) => {
+route.get('/:Vendor_id', (req, res) => {
     const query = `SELECT *
     FROM (SELECT * FROM carts WHERE Vendor_ID = ?) X
     INNER JOIN products
@@ -42,8 +49,16 @@ route.get('/:id', (req, res) => {
     connection.query(
         query,
         [req.params.id],
-        function (err, results, fields) {
-            res.send(results || err);
+        function (err, results) {
+            if (results) {
+                const resbody = {
+                    totalItems: results.length,
+                    cart: results
+                }
+                res.status(200).json(resbody);
+            } else {
+                res.status(400).json(err);
+            }
         }
     )
 })

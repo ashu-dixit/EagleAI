@@ -21,7 +21,7 @@ connection.query(
       PRIMARY KEY (VENDOR_ID)
   )`,
   function (err, result) {
-    console.log(result || err);
+    // console.log(result || err);
   }
 )
 connection.query(
@@ -37,7 +37,7 @@ connection.query(
       PRIMARY KEY (Product_ID)
   )`,
   function (err, result) {
-    console.log(result || err);
+    // console.log(err);
   }
 )
 connection.query(
@@ -48,7 +48,7 @@ connection.query(
       primary key(Product_ID, Vendor_ID)
   )`,
   function (err, result) {
-    console.log(result || err);
+    // console.log(result || err);
   }
 )
 exports = module.exports = { connection }
