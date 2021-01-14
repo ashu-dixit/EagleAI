@@ -13,27 +13,44 @@ route.post('/', (req, res) => {
         }
     )
 })
-route.get('/:pageNo', (req, res) => {
+route.get('/', (req, res) => {
     const query1 = `SELECT * FROM products limit ?, ?;`
-    let offset = (parseInt(req.params.pageNo) - 1) * 20
-    connection.query(
-        query1,
-        [offset, 20],
-        function (err, results) {
-            res.send(results || err);
-        }
-    )
-
-})
-route.get('/:Product_ID', (req, res) => {
     const query2 = `SELECT * FROM products where Product_ID = ?;`
-    connection.query(
-        query2,
-        [req.params.Product_ID],
-        function (err, results) {
-            res.status(200).send(results);
-        }
-    )
+    let offset = (parseInt(req.query.pageno) - 1) * 20
+    if (req.body.Product_ID) {
+        connection.query(
+            query2,
+            [req.body.Product_ID],
+            function (err, results) {
+                if(results){
+                    const resBody = {
+                        totalItems: results.length,
+                        products: results
+                    }
+                    res.status(200).json(resBody);
+                }else{
+                    res.status(400).json(err);
+                }
+            }
+        )
+    } else if (req.query.pageno) {
+        connection.query(
+            query1,
+            [offset, 20],
+            function (err, results) {
+                if(results){
+                    const resBody = {
+                        totalItems: results.length,
+                        products: results
+                    }
+                    res.status(200).json(resBody);
+                }else{
+                    res.status(400).json(err);
+                }
+            }
+        )
+    }
+
 })
 
 route.patch('/', (req, res) => {

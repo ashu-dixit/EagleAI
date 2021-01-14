@@ -48,7 +48,7 @@ route.get('/:Vendor_id', (req, res) => {
     ON products.Product_ID = X.Product_ID;`
     connection.query(
         query,
-        [req.params.id],
+        [req.params.Vendor_id],
         function (err, results) {
             if (results) {
                 const resbody = {
