@@ -36,8 +36,7 @@ route.get('/', (req, res) => {
             function (err, results) {
                 if(results){
                     connection.query(
-                        'SELECT COUNT(*) As items FROM products'
-                        [req.params.Vendor_id],
+                        'SELECT COUNT(*) As items FROM products',
                         function (err, totalItems) {
                             console.log(totalItems);
                             if (totalItems) {
