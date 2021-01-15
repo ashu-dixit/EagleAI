@@ -36,13 +36,14 @@ route.get('/', (req, res) => {
             function (err, results) {
                 if(results){
                     connection.query(
-                        'SELECT COUNT(*) FROM products WHERE Vendor_ID = ?',
+                        'SELECT COUNT(*) As items FROM products'
                         [req.params.Vendor_id],
                         function (err, totalItems) {
-                            if (results) {
+                            console.log(totalItems);
+                            if (totalItems) {
                                 const resbody = {
-                                    totalItems: totalItems[0]['COUNT(*)'],
-                                    cart: results
+                                    totalItems: totalItems,
+                                    products: results
                                 }
                                 res.status(200).json(resbody);
                             } else {
@@ -50,6 +51,7 @@ route.get('/', (req, res) => {
                             }
                         }
                     )
+                    res.send(results);
                 }else{
                     res.status(400).json(err);
                 }

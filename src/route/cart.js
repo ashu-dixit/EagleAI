@@ -52,12 +52,13 @@ route.get('/:Vendor_id', (req, res) => {
         query,
         [req.params.Vendor_id, offset, 10],
         function (err, results) {
+            console.log(offset)
             if (results) {
                 connection.query(
                     'SELECT COUNT(*) FROM carts WHERE Vendor_ID = ?',
                     [req.params.Vendor_id],
                     function (err, totalItems) {
-                        if (results) {
+                        if (totalItems) {
                             const resbody = {
                                 totalItems: totalItems[0]['COUNT(*)'],
                                 cart: results
