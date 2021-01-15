@@ -11,5 +11,6 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/', express.static(path.join(__dirname, 'public')));
 app.use('/cart', require('./route/cart').route)
 app.use('/products', require('./route/products').route)
+app.use('/orders', require('./route/orders').route)
 
 app.listen(PORT, () => console.log("Hello"));

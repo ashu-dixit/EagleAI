@@ -45,19 +45,31 @@ route.get('/:Vendor_id', (req, res) => {
     const query = `SELECT *
     FROM (SELECT * FROM carts WHERE Vendor_ID = ?) X
     INNER JOIN products
-    ON products.Product_ID = X.Product_ID;`
+    ON products.Product_ID = X.Product_ID
+    Limit ?, ?;`
+    let offset = (parseInt(req.query.pageno) - 1) * 10
     connection.query(
         query,
-        [req.params.Vendor_id],
+        [req.params.Vendor_id, offset, 10],
         function (err, results) {
             if (results) {
-                const resbody = {
-                    totalItems: results.length,
-                    cart: results
-                }
-                res.status(200).json(resbody);
+                connection.query(
+                    'SELECT COUNT(*) FROM carts WHERE Vendor_ID = ?',
+                    [req.params.Vendor_id],
+                    function (err, totalItems) {
+                        if (results) {
+                            const resbody = {
+                                totalItems: totalItems[0]['COUNT(*)'],
+                                cart: results
+                            }
+                            res.status(200).json(resbody);
+                        } else {
+                            res.status(400).json({ message: err });
+                        }
+                    }
+                )
             } else {
-                res.status(400).json(err);
+                res.status(400).json({ message: err });
             }
         }
     )

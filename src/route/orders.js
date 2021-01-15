@@ -3,7 +3,7 @@ const connection = require('../sqldb').connection
 
 route.post('/', (req, res) => {
     const query = `INSERT INTO 
-                products (product_name, product_price, qty_kilos,qty_dozen, expiry_date, product_image, discount) 
+                orders (Vendor_ID, product_ID, status , price, transaction_ID, order_date) 
                 VALUE (?, ?, ?, ?, STR_TO_DATE(?, "%M %d %Y"), ?, ?);`
     connection.query(
         query,
@@ -16,7 +16,7 @@ route.post('/', (req, res) => {
 route.get('/', (req, res) => {
     const query1 = `SELECT * FROM products limit ?, ?;`
     const query2 = `SELECT * FROM products where Product_ID = ?;`
-    let offset = (parseInt(req.query.pageno) - 1) * 10
+    let offset = (parseInt(req.query.pageno) - 1) * 20
     if (req.body.Product_ID) {
         connection.query(
             query2,
@@ -32,24 +32,14 @@ route.get('/', (req, res) => {
     } else if (req.query.pageno) {
         connection.query(
             query1,
-            [offset, 10],
+            [offset, 20],
             function (err, results) {
                 if(results){
-                    connection.query(
-                        'SELECT COUNT(*) FROM products WHERE Vendor_ID = ?',
-                        [req.params.Vendor_id],
-                        function (err, totalItems) {
-                            if (results) {
-                                const resbody = {
-                                    totalItems: totalItems[0]['COUNT(*)'],
-                                    cart: results
-                                }
-                                res.status(200).json(resbody);
-                            } else {
-                                res.status(400).json({ message: err });
-                            }
-                        }
-                    )
+                    const resBody = {
+                        totalItems: results.length,
+                        products: results
+                    }
+                    res.status(200).json(resBody);
                 }else{
                     res.status(400).json(err);
                 }
