@@ -38,10 +38,9 @@ route.get('/', (req, res) => {
                     connection.query(
                         'SELECT COUNT(*) As items FROM products',
                         function (err, totalItems) {
-                            console.log(totalItems);
                             if (totalItems) {
                                 const resbody = {
-                                    totalItems: totalItems,
+                                    totalItems: totalItems[0]["items"],
                                     products: results
                                 }
                                 res.status(200).json(resbody);
@@ -50,7 +49,6 @@ route.get('/', (req, res) => {
                             }
                         }
                     )
-                    res.send(results);
                 }else{
                     res.status(400).json(err);
                 }
