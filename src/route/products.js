@@ -71,6 +71,14 @@ route.patch('/', (req, res) => {
 
 route.delete('/', (req, res) => {
     const query = 'DELETE FROM `products` WHERE Product_ID = ?'
+    const query2 = `DELETE FROM carts WHERE Product_ID = ?`
+    connection.query(
+        query,
+        [req.body.Product_ID],
+        function (err, results) {
+            res.send(results || err);
+        }
+    )
     connection.query(
         query,
         [req.body.Product_ID],

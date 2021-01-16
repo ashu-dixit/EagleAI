@@ -1,13 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
+
 <body>
 
     <h1>Hello</h1>
-    
+    <button id=rzp-button1>Pay ₹ 50</button>
+
 </body>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    const info = {
+        amount: 499 * 100,
+        currency: 'INR',
+    }
+    const promise = fetch('http://140.238.228.101/pay/razorpay', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(info)
+    }).then((t) =>
+        t.json()
+    )
+
+    promise.then(data => {
+        const options = {
+            key: 'rzp_test_KYoID8iTFoYAUK',
+            currency: data.currency,
+            amount: data.amount,
+            order_id: data.id,
+            name: 'Donation',
+            description: 'Thank you for nothing. Please give us some money',
+            handler: function (response) {
+                alert(response.razorpay_payment_id)
+                alert(response.razorpay_order_id)
+                alert(response.razorpay_signature)
+            },
+            prefill: {
+                name,
+                email: 'sdfdsjfh2@ndsfdf.com',
+                phone_number: '9899999999'
+            }
+        }
+        var rzp1 = new Razorpay(options);
+        rzp1.on('payment.failed', function (response) {
+            alert(response.error.code);
+            alert(response.error.description);
+            alert(response.error.source);
+            alert(response.error.step);
+            alert(response.error.reason);
+            alert(response.error.metadata.order_id);
+            alert(response.error.metadata.payment_id);
+        });
+        document.getElementById('rzp-button1').onclick = function (e) {
+            rzp1.open();
+            e.preventDefault();
+        }
+
+    })
+</script>
+
 </html>
