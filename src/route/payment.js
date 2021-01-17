@@ -24,6 +24,7 @@ route.post('/verification', (req, res) => {
 
     if (digest === req.headers['x-razorpay-signature']) {
         res.json({ status: 'ok' })
+        
     } else {
         res.status(401)
     }
@@ -37,10 +38,9 @@ route.post('/razorpay', async (req, res) => {
         receipt: shortid.generate(),
         payment_capture
     }
-
+    
     try {
         const response = await razorpay.orders.create(options)
-        console.log(response)
         res.json({
             id: response.id,
             currency: response.currency,

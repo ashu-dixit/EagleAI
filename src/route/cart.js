@@ -8,7 +8,7 @@ route.post('/', (req, res) => {
         [req.body.Vendor_ID, req.body.Product_ID, req.body.product_qty],
         function (err, results) {
             if (results) {
-                res.send("product Updated successfully")
+                res.send(results)
             } else {
                 const resbody = {
                     error: err
@@ -52,8 +52,11 @@ route.get('/:Vendor_id', (req, res) => {
         query,
         [req.params.Vendor_id, offset, 10],
         function (err, results) {
-            console.log(offset)
             if (results) {
+                var price = 0;
+                results.forEach(element => {
+                    price += ((element.product_qty) * element.product_price * (100 - element.discount))/100;
+                });
                 connection.query(
                     'SELECT COUNT(*) FROM carts WHERE Vendor_ID = ?',
                     [req.params.Vendor_id],
@@ -61,6 +64,7 @@ route.get('/:Vendor_id', (req, res) => {
                         if (totalItems) {
                             const resbody = {
                                 totalItems: totalItems[0]['COUNT(*)'],
+                                totalprice : price,
                                 cart: results
                             }
                             res.status(200).json(resbody);
