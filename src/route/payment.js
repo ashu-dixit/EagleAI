@@ -44,7 +44,8 @@ route.post('/razorpay', async (req, res) => {
         res.json({
             id: response.id,
             currency: response.currency,
-            amount: response.amount
+            amount: response.amount,
+            response: response,
         })
     } catch (error) {
         console.log(error)
