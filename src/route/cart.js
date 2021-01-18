@@ -55,7 +55,7 @@ route.get('/:Vendor_id', (req, res) => {
             if (results) {
                 var price = 0;
                 results.forEach(element => {
-                    price += ((element.product_qty) * element.product_price * (100 - element.discount))/100;
+                    price += (element.product_qty * element.product_price) / 100;
                 });
                 connection.query(
                     'SELECT COUNT(*) FROM carts WHERE Vendor_ID = ?',
@@ -64,7 +64,7 @@ route.get('/:Vendor_id', (req, res) => {
                         if (totalItems) {
                             const resbody = {
                                 totalItems: totalItems[0]['COUNT(*)'],
-                                totalprice : price,
+                                totalprice: price,
                                 cart: results
                             }
                             res.status(200).json(resbody);
