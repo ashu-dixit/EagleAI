@@ -24,7 +24,8 @@ route.post('/verification', (req, res) => {
     console.log(digest, req.headers['x-razorpay-signature'])
 
     if (digest === req.headers['x-razorpay-signature']) {
-        const query = `INSERT INTO transactions (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?,?,?)`
+        console.log(req.body)
+        const query = `INSERT INTO transactions (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
         connection.query(
             query,
             [req.body.orderID, req.body.payment_ID, req.body.type, 'Debit', 'Success'],
@@ -52,7 +53,7 @@ route.post('/verify', (req, res) => {
 route.post('/razorpay', async (req, res) => {
     const payment_capture = 1
     const options = {
-        amount: parseInt(req.body.amount) * 100,
+        amount: parseInt(req.body.grandTotal) * 100,
         currency: req.body.currency,
         receipt: shortid.generate(),
         payment_capture
@@ -61,13 +62,14 @@ route.post('/razorpay', async (req, res) => {
     try {
         const response = await razorpay.orders.create(options)
         connection.query(
-            `INSERT INTO order(orderId, Vendor_ID, subTotal, itemDiscount, tax, shipping, total, promo, discount, grandTotal, name, mobile, email, address, city, country)
-        VALUE(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [response.id, req.body.Vendor_ID, req.body.subTotal, req.body.itemDiscount, req.body.tax, req.body.shipping, req.body.total, req.body.promo, req.body.discount, req.body.grandTotal, req.body.name, req.body.mobile, req.body.email, req.body.address, req.body.city, req.body.country],
+            `INSERT INTO orders (orderId, Vendor_ID, subTotal, itemDiscount, tax, shipping, total, promo, discount, grandTotal, name, mobile, email, address, city, country, status)
+        VALUE(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [response.id, req.body.Vendor_ID, req.body.subTotal, req.body.itemDiscount, req.body.tax, req.body.shipping, req.body.total, req.body.promo, req.body.discount, req.body.grandTotal, req.body.name, req.body.mobile, req.body.email, req.body.address, req.body.city, req.body.country, response.status],
             function (err, results) {
+                const query1 = `INSERT INTO order_item (orderId, product_ID, product_qty) SELECT '` + response.id + `', Product_ID, product_qty FROM carts WHERE Vendor_ID = ?;`
                 connection.query(
-                    `INSERT INTO order_item (orderId, product_ID, product_qty) SELECT ? , Product_ID, product_qty FROM INTO carts WHERE Vendor_ID = ?;`
-                    [response.id, req.body.Vendor_ID],
+                    query1,
+                    [req.body.Vendor_ID],
                     function (err, results) {
                         console.log(results || err);
                         res.json({

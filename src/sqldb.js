@@ -70,6 +70,7 @@ connection.query(
       address VARCHAR(50) NULL DEFAULT NULL,
       city VARCHAR(50) NULL DEFAULT NULL,
       country VARCHAR(50) NULL DEFAULT NULL,
+      status VARCHAR(50) default 'Failed',
       PRIMARY KEY (orderId)
   )`,
   function (err, result) {
@@ -78,7 +79,7 @@ connection.query(
 )
 connection.query(
   `Create table IF NOT EXISTS order_item(
-    id BIGINT NOT NULL AUTO INCREMENT, 
+    id BIGINT NOT NULL AUTO_INCREMENT, 
     orderID VARCHAR(50) NOT NULL,
     product_ID BIGINT NOT NULL,  
     product_qty VARCHAR(50) NULL DEFAULT NULL,
@@ -90,12 +91,13 @@ connection.query(
 )
 connection.query(
   `Create table IF NOT EXISTS transactions(
-    id BIGINT NOT NULL AUTO INCREMENT, 
+    id BIGINT NOT NULL AUTO_INCREMENT, 
+    orderID VARCHAR(50) NOT NULL,
     payment_ID VARCHAR(50), 
     type VARCHAR(50),
     mode VARCHAR(50),
-    status VARCHAR(50) default Failed,  
-    PRIMARY KEY (orderId)
+    status VARCHAR(50) default 'Failed',  
+    PRIMARY KEY (id)
   )`,
   function (err, result) {
     // console.log(err);
