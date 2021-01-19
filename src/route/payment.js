@@ -49,7 +49,7 @@ route.post('/verify', (req, res) => {
             if(results.length === 0){
                 res.json({status: 'Failed'})
             }else{
-                res.json(results || err)
+                res.json(results[0] || err)
             }
         }
     )
