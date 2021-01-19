@@ -46,8 +46,8 @@ route.post('/verify', (req, res) => {
         query,
         [req.body.orderId],
         function (err, results) {
-            if(err){
-                res.json({status: 'Error'})
+            if(results.length === 0){
+                res.json({status: 'Failed'})
             }else{
                 res.json(results || err)
             }
