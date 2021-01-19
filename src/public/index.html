@@ -16,7 +16,21 @@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     const info = {
-        amount: 499 * 100,
+        Vendor_ID: 0,
+        subTotal: 12,
+        itemDiscount: 12,
+        tax: 12,
+        shipping: 21,
+        total: 21,
+        promo: 12,
+        discount: 21,
+        grandTotal: 90,
+        name: 'Ashu',
+        mobile: 9998898989,
+        email: 'sasasa@asa.com',
+        address: 'PitamPura',
+        city: 'Delhi',
+        country: 'India',
         currency: 'INR',
     }
     const promise = fetch('http://140.238.228.101/pay/razorpay', {
