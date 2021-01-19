@@ -28,7 +28,7 @@ route.post('/verification', (req, res) => {
         const query = `INSERT INTO transactions (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
         connection.query(
             query,
-            [req.body.payload.payment.entity.orderID, req.body.payload.payment.entity.id, req.body.type, 'Debit', 'Success'],
+            [req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.type, 'Debit', 'Success'],
             function (err, results) {
                 console.log(results || err);
                 res.json({ status: 'ok' })
