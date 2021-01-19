@@ -60,6 +60,7 @@ route.post('/razorpay', async (req, res) => {
     }
 
     try {
+        console.log(options);
         const response = await razorpay.orders.create(options)
         connection.query(
             `INSERT INTO orders (orderId, Vendor_ID, subTotal, itemDiscount, tax, shipping, total, promo, discount, grandTotal, name, mobile, email, address, city, country, status)
