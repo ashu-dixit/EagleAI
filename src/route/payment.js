@@ -24,7 +24,7 @@ route.post('/verification', (req, res) => {
     console.log(digest, req.headers['x-razorpay-signature'])
 
     if (digest === req.headers['x-razorpay-signature']) {
-        console.log(req.body)
+        console.log(req.body.payload.payment.entity)
         const query = `INSERT INTO transactions (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
         connection.query(
             query,
