@@ -5,7 +5,7 @@ route.get('/:vendorID', (req, res) => {
     const query = `SELECT * FROM order_item where orderId = (select orderId from orders where vendor_ID = ?)`
     if (req.body.id) {
         connection.query(
-            'SELECT * from order_item from where id = ?',
+            'SELECT * from orders from where id = ?',
             [req.body.id],
             function (err, results) {
                 if (results) {
