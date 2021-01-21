@@ -40,7 +40,6 @@ route.delete('/', (req, res) => {
     )
 })
 
-
 route.get('/:Vendor_id', (req, res) => {
     const query = `SELECT *
     FROM (SELECT * FROM carts WHERE Vendor_ID = ?) X
