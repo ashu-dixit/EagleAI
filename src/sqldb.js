@@ -56,7 +56,7 @@ connection.query(
   `Create table IF NOT EXISTS orders(
       orderID VARCHAR(50) NOT NULL,
       Vendor_ID INT NOT NULL,
-      product_ID BIGINT NOT NULL,
+      Product_ID BIGINT NOT NULL,
       product_qty INT NOT NULL,
       status VARCHAR(50) NOT NULL,  
       PRIMARY KEY (orderId, product_ID)
