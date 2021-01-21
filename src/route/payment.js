@@ -32,17 +32,16 @@ route.post('/verification', (req, res) => {
             [req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.type, 'Debit', 'Success'],
             function (err, results) {
                 console.log(results || err);
-                connection.query(
-                    query2,
-                    [req.body.payload.payment.entity.order_id],
-                    function (err, results) {
-                        console.log(results || err);
-                        res.json({ status: 'ok' })
-                    }
-                )
             }
         )
-
+        connection.query(
+            query2,
+            [req.body.payload.payment.entity.order_id],
+            function (err, results) {
+                console.log(results || err);
+                res.json({ status: 'ok' })
+            }
+        )
     } else {
         res.status(401)
     }

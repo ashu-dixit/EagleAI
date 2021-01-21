@@ -70,7 +70,6 @@ connection.query(
       address VARCHAR(50) NULL DEFAULT NULL,
       city VARCHAR(50) NULL DEFAULT NULL,
       country VARCHAR(50) NULL DEFAULT NULL,
-      status VARCHAR(50) default 'Failed',
       PRIMARY KEY (orderId)
   )`,
   function (err, result) {
