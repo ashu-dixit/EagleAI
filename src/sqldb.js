@@ -57,6 +57,7 @@ connection.query(
       orderID VARCHAR(50) NOT NULL,
       Vendor_ID INT NOT NULL,
       product_ID BIGINT NOT NULL,
+      product_qty INT NOT NULL
       status VARCHAR(50) Not NULL,  
       PRIMARY KEY (orderId)
   )`,
