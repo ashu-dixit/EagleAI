@@ -56,34 +56,9 @@ connection.query(
   `Create table IF NOT EXISTS orders(
       orderID VARCHAR(50) NOT NULL,
       Vendor_ID INT NOT NULL,
-      subTotal INT NOT NULL DEFAULT 0,
-      itemDiscount FLOAT NOT NULL DEFAULT 0,
-      tax FLOAT NOT NULL DEFAULT 0,
-      shipping FLOAT NOT NULL DEFAULT 0,
-      total FLOAT NOT NULL DEFAULT 0,
-      promo VARCHAR(50) NULL DEFAULT NULL,
-      discount FLOAT NOT NULL DEFAULT 0,
-      grandTotal FLOAT NOT NULL DEFAULT 0,
-      name VARCHAR(50) NULL DEFAULT NULL,
-      mobile VARCHAR(15) NULL,
-      email VARCHAR(50) NULL,
-      address VARCHAR(50) NULL DEFAULT NULL,
-      city VARCHAR(50) NULL DEFAULT NULL,
-      country VARCHAR(50) NULL DEFAULT NULL,
+      product_ID BIGINT NOT NULL,
+      status VARCHAR(50) Not NULL,  
       PRIMARY KEY (orderId)
-  )`,
-  function (err, result) {
-    console.log(err);
-  }
-)
-connection.query(
-  `Create table IF NOT EXISTS order_item(
-    id BIGINT NOT NULL AUTO_INCREMENT, 
-    orderID VARCHAR(50) NOT NULL,
-    product_ID BIGINT NOT NULL,
-    status VARCHAR(50) Not NULL,
-    product_qty VARCHAR(50) NULL DEFAULT NULL,
-    PRIMARY KEY (id)
   )`,
   function (err, result) {
     console.log(err);

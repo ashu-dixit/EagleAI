@@ -26,7 +26,7 @@ route.post('/verification', (req, res) => {
     if (digest === req.headers['x-razorpay-signature']) {
         console.log(req.body.payload.payment.entity)
         const query = `INSERT INTO transactions (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
-        const query2 = `UPDATE order_item SET status = 'Awaiting Fulfillment' WHERE orderId = ?`
+        const query2 = `UPDATE orders SET status = 'Awaiting Fulfillment' WHERE orderId = ?`
         connection.query(
             query,
             [req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.type, 'Debit', 'Success'],
@@ -76,28 +76,19 @@ route.post('/razorpay', async (req, res) => {
         console.log(options);
         const response = await razorpay.orders.create(options)
         connection.query(
-            `INSERT INTO orders (orderId, Vendor_ID, subTotal, itemDiscount, tax, shipping, total, promo, discount, grandTotal, name, mobile, email, address, city, country)
-        VALUE (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [response.id, req.body.Vendor_ID, req.body.subTotal, req.body.itemDiscount, req.body.tax, req.body.shipping, req.body.total, req.body.promo, req.body.discount, req.body.grandTotal, req.body.name, req.body.mobile, req.body.email, req.body.address, req.body.city, req.body.country],
+            `INSERT INTO orders (orderId, Vendor_ID, product_ID, product_qty, status) SELECT '?', Vendor_ID,  Product_ID, product_qty, '?', FROM carts WHERE Vendor_ID = ?;`,
+            [response.id, `Awaiting Payment`, req.body.Vendor_ID],
             function (err, results) {
-                const query1 = `INSERT INTO order_item (orderId, product_ID, product_qty, status) SELECT '` + response.id + `', Product_ID,'` + 'Awaiting Payment' + `', product_qty FROM carts WHERE Vendor_ID = ?;`
                 connection.query(
-                    query1,
+                    `delete from carts where Vendor_ID = ?`,
                     [req.body.Vendor_ID],
                     function (err, results) {
-                        connection.query(
-                            `delete from carts where Vendor_ID = ?`,
-                            [req.body.Vendor_ID],
-                            function (err, results) {
-                                res.json({
-                                    id: response.id,
-                                    currency: response.currency,
-                                    amount: response.amount,
-                                    response: response,
-                                })
-                            }
-                        )
-                        console.log(results || err);
+                        res.json({
+                            id: response.id,
+                            currency: response.currency,
+                            amount: response.amount,
+                            response: response,
+                        })
                     }
                 )
                 console.log(results || err);
