@@ -85,13 +85,19 @@ route.post('/razorpay', async (req, res) => {
                     query1,
                     [req.body.Vendor_ID],
                     function (err, results) {
+                        connection.query(
+                            `delete from carts where Vendor_ID = ?`,
+                            [req.body.Vendor_ID],
+                            function (err, results) {
+                                res.json({
+                                    id: response.id,
+                                    currency: response.currency,
+                                    amount: response.amount,
+                                    response: response,
+                                })
+                            }
+                        )
                         console.log(results || err);
-                        res.json({
-                            id: response.id,
-                            currency: response.currency,
-                            amount: response.amount,
-                            response: response,
-                        })
                     }
                 )
             }
