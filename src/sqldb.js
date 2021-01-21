@@ -59,7 +59,7 @@ connection.query(
       product_ID BIGINT NOT NULL,
       product_qty INT NOT NULL,
       status VARCHAR(50) NOT NULL,  
-      PRIMARY KEY (orderId)
+      PRIMARY KEY (orderId, product_ID)
   )`,
   function (err, result) {
     console.log(err);
