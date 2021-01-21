@@ -100,6 +100,7 @@ route.post('/razorpay', async (req, res) => {
                         console.log(results || err);
                     }
                 )
+                console.log(results || err);
             }
         )
     } catch (error) {
