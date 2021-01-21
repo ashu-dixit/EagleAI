@@ -48,7 +48,7 @@ connection.query(
       primary key(Product_ID, Vendor_ID)
   )`,
   function (err, result) {
-    // console.log(result || err);
+    console.log(err);
   }
 )
 
@@ -73,7 +73,7 @@ connection.query(
       PRIMARY KEY (orderId)
   )`,
   function (err, result) {
-    // console.log(err);
+    console.log(err);
   }
 )
 connection.query(
@@ -86,7 +86,7 @@ connection.query(
     PRIMARY KEY (id)
   )`,
   function (err, result) {
-    // console.log(err);
+    console.log(err);
   }
 )
 connection.query(
@@ -97,10 +97,10 @@ connection.query(
     type VARCHAR(50),
     mode VARCHAR(50),
     status VARCHAR(50) default 'Failed',  
-    PRIMARY KEY (id),
+    PRIMARY KEY (id)
   )`,
   function (err, result) {
-    // console.log(err);
+    console.log(err);
   }
 )
 exports = module.exports = { connection }
