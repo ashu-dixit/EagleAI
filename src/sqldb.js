@@ -81,7 +81,8 @@ connection.query(
   `Create table IF NOT EXISTS order_item(
     id BIGINT NOT NULL AUTO_INCREMENT, 
     orderID VARCHAR(50) NOT NULL,
-    product_ID BIGINT NOT NULL,  
+    product_ID BIGINT NOT NULL,
+    status VARCHAR(50) Not NULL,
     product_qty VARCHAR(50) NULL DEFAULT NULL,
     PRIMARY KEY (id)
   )`,
@@ -97,7 +98,7 @@ connection.query(
     type VARCHAR(50),
     mode VARCHAR(50),
     status VARCHAR(50) default 'Failed',  
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
   )`,
   function (err, result) {
     // console.log(err);

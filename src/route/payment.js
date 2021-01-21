@@ -26,14 +26,23 @@ route.post('/verification', (req, res) => {
     if (digest === req.headers['x-razorpay-signature']) {
         console.log(req.body.payload.payment.entity)
         const query = `INSERT INTO transactions (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
+        const query2 = `UPDATE order_item SET status = 'Awaiting Fulfillment' WHERE orderId = ?`
         connection.query(
             query,
             [req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.type, 'Debit', 'Success'],
             function (err, results) {
                 console.log(results || err);
-                res.json({ status: 'ok' })
+                connection.query(
+                    query2,
+                    [req.body.payload.payment.entity.order_id],
+                    function (err, results) {
+                        console.log(results || err);
+                        res.json({ status: 'ok' })
+                    }
+                )
             }
         )
+
     } else {
         res.status(401)
     }
@@ -46,9 +55,9 @@ route.post('/verify', (req, res) => {
         query,
         [req.body.orderId],
         function (err, results) {
-            if(results.length === 0){
-                res.json({status: 'Failed'})
-            }else{
+            if (results.length === 0) {
+                res.json({ status: 'Failed' })
+            } else {
                 res.json(results[0] || err)
             }
         }
@@ -72,7 +81,7 @@ route.post('/razorpay', async (req, res) => {
         VALUE(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [response.id, req.body.Vendor_ID, req.body.subTotal, req.body.itemDiscount, req.body.tax, req.body.shipping, req.body.total, req.body.promo, req.body.discount, req.body.grandTotal, req.body.name, req.body.mobile, req.body.email, req.body.address, req.body.city, req.body.country, response.status],
             function (err, results) {
-                const query1 = `INSERT INTO order_item (orderId, product_ID, product_qty) SELECT '` + response.id + `', Product_ID, product_qty FROM carts WHERE Vendor_ID = ?;`
+                const query1 = `INSERT INTO order_item (orderId, product_ID, product_qty, status) SELECT '` + response.id + `', Product_ID,` + 'Awaiting Payment' + ` product_qty FROM carts WHERE Vendor_ID = ?;`
                 connection.query(
                     query1,
                     [req.body.Vendor_ID],

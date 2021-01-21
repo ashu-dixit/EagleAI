@@ -13,47 +13,27 @@ route.post('/', (req, res) => {
         }
     )
 })
-route.get('/', (req, res) => {
-    const query1 = `SELECT * FROM products limit ?, ?;`
-    const query2 = `SELECT * FROM products where Product_ID = ?;`
-    let offset = (parseInt(req.query.pageno) - 1) * 20
-    if (req.body.Product_ID) {
-        connection.query(
-            query2,
-            [req.body.Product_ID],
-            function (err, results) {
-                if(results){
-                    res.status(200).json(results);
-                }else{
-                    res.status(400).json(err);
-                }
+route.get('/:vendorID', (req, res) => {
+    const query = `SELECT * FROM order_item where orderId = (select orderId from orders where vendor_ID = ?)`
+    connection.query(
+        query,
+        [req.params.vendorID],
+        function (err, results) {
+            if (results) {
+                res.status(200).json(results);
+            } else {
+                res.status(400).json(err);
             }
-        )
-    } else if (req.query.pageno) {
-        connection.query(
-            query1,
-            [offset, 20],
-            function (err, results) {
-                if(results){
-                    const resBody = {
-                        totalItems: results.length,
-                        products: results
-                    }
-                    res.status(200).json(resBody);
-                }else{
-                    res.status(400).json(err);
-                }
-            }
-        )
-    }
+        }
+    )
 
 })
 
 route.patch('/', (req, res) => {
-    const query = `UPDATE products set product_name = ?, product_price = ?, qty_kilos = ?, qty_dozen = ?, expiry_date =  STR_TO_DATE(?, "%M %d %Y"), product_image = ?, discount = ? WHERE Product_ID = ?;`
+    const query = `UPDATE order_item SET status = ? WHERE orderId = (select orderId from orders where vendor_ID = ?);`
     connection.query(
         query,
-        [req.body.product_name, req.body.product_price, req.body.qty_kilos, req.body.qty_dozen, req.body.expiry_date, req.body.product_image, req.body.discount, req.body.Product_ID],
+        [req.body.status, req.body.vendor_ID],
         function (err, results) {
             res.send(results || err);
         }
@@ -61,10 +41,10 @@ route.patch('/', (req, res) => {
 })
 
 route.delete('/', (req, res) => {
-    const query = 'DELETE FROM `products` WHERE Product_ID = ?'
+    const query = 'DELETE FROM `order_items` WHERE id = ?'
     connection.query(
         query,
-        [req.body.Product_ID],
+        [req.body.id],
         function (err, results) {
             res.send(results || err);
         }
