@@ -1,6 +1,5 @@
 const route = require('express').Router()
 const connection = require('../sqldb').connection
-
 route.get('/:Vendor_id', (req, res) => {
     const query = `select * 
     from (SELECT * FROM orders WHERE Vendor_ID = ?) X
@@ -41,16 +40,16 @@ route.get('/:Vendor_id', (req, res) => {
 })
 
 
-// route.patch('/', (req, res) => {
-//     const query = `UPDATE order SET status = ? WHERE orderId = ? and productID = ?`
-//     connection.query(
-//         query,
-//         [req.body.status, req.body.order_item_id],
-//         function (err, results) {
-//             res.send(results || err);
-//         }
-//     )
-// })
+route.patch('/', (req, res) => {
+    const query = `UPDATE orders SET status = ?, delivery_date = ? WHERE orderId = ? and Product_ID = ?`
+    connection.query(
+        query,
+        [req.body.status, req.body.order_item_id],
+        function (err, results) {
+            res.send(results || err);
+        }
+    )
+})
 
 // route.delete('/', (req, res) => {
 //     const query = 'DELETE FROM `order_items` WHERE id = ?'

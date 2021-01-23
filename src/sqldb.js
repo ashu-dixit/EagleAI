@@ -58,8 +58,9 @@ connection.query(
       Vendor_ID INT NOT NULL,
       Product_ID BIGINT NOT NULL,
       product_qty INT NOT NULL,
-      status VARCHAR(50) NOT NULL,  
-      PRIMARY KEY (orderId, product_ID)
+      status VARCHAR(50) NOT NULL,
+      delivery_date DATETIME NOT NULL,
+      PRIMARY KEY (orderID, Vendor_ID, Product_ID)
   )`,
   function (err, result) {
     console.log(err);

@@ -75,9 +75,12 @@ route.post('/razorpay', async (req, res) => {
     try {
         console.log(options);
         const response = await razorpay.orders.create(options)
+        var firstDay = new Date();
+        var nextWeek = new Date(firstDay.getTime() + 7 * 24 * 60 * 60 * 1000);
+        console.log(nextWeek);
         connection.query(
-            `INSERT INTO orders (orderId, Vendor_ID, product_ID, product_qty, status) SELECT ?, Vendor_ID,  Product_ID, product_qty, ? FROM carts WHERE Vendor_ID = ?;`,
-            [response.id, `Awaiting Payment`, req.body.Vendor_ID],
+            `INSERT INTO orders (orderId, Vendor_ID, Product_ID, product_qty, status, delivery_date) SELECT ?, Vendor_ID,  Product_ID, product_qty, ?, DATE(?) FROM carts WHERE Vendor_ID = ?;`,
+            [response.id, `Awaiting Payment`, nextWeek, req.body.Vendor_ID],
             function (err, results) {
                 connection.query(
                     `delete from carts where Vendor_ID = ?`,
