@@ -1,15 +1,15 @@
 const route = require('express').Router()
 const connection = require('../sqldb').connection
-route.get('/:Vendor_id', (req, res) => {
+route.get('/:User_id', (req, res) => {
     const query = `select * 
-    from (SELECT * FROM orders WHERE Vendor_ID = ?) X
+    from (SELECT * FROM orders WHERE User_ID = ?) X
     INNER JOIN products
     ON products.Product_ID = X.Product_ID
     Limit ?, ?;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
     connection.query(
         query,
-        [req.params.Vendor_id, offset, 10],
+        [req.params.User_ID, offset, 10],
         function (err, results) {
             if (results) {
                 var price = 0;
@@ -17,8 +17,8 @@ route.get('/:Vendor_id', (req, res) => {
                     price += (element.product_qty * element.product_price);
                 });
                 connection.query(
-                    'SELECT COUNT(*) FROM orders WHERE Vendor_ID = ?',
-                    [req.params.Vendor_id],
+                    'SELECT COUNT(*) FROM orders WHERE User_ID = ?',
+                    [req.params.User_ID],
                     function (err, totalItems) {
                         if (totalItems) {
                             const resbody = {

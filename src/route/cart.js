@@ -2,10 +2,10 @@ const route = require('express').Router()
 const connection = require('../sqldb').connection
 
 route.post('/', (req, res) => {
-    const query = 'INSERT INTO `carts` (`Vendor_ID`, `Product_ID`, `product_qty`) values (?,?,?)'
+    const query = 'INSERT INTO `carts` (`User_ID`, `Product_ID`, `product_qty`) values (?,?,?)'
     connection.query(
         query,
-        [req.body.Vendor_ID, req.body.Product_ID, req.body.product_qty],
+        [req.body.User_ID, req.body.Product_ID, req.body.product_qty],
         function (err, results) {
             if (results) {
                 res.send(results)
@@ -20,36 +20,36 @@ route.post('/', (req, res) => {
 })
 
 route.put('/', (req, res) => {
-    const query = `UPDATE carts set product_qty = ? WHERE Vendor_ID = ? AND Product_ID = ?`
+    const query = `UPDATE carts set product_qty = ? WHERE User_ID = ? AND Product_ID = ?`
     connection.query(
         query,
-        [req.body.product_qty, req.body.Vendor_ID, req.body.Product_ID],
+        [req.body.product_qty, req.body.User_ID, req.body.Product_ID],
         function (err, results) {
             res.status(200).json(results)
         }
     )
 })
 route.delete('/', (req, res) => {
-    const query = 'DELETE FROM `carts` WHERE Vendor_ID = ? AND Product_ID = ?'
+    const query = 'DELETE FROM `carts` WHERE User_ID = ? AND Product_ID = ?'
     connection.query(
         query,
-        [req.body.Vendor_ID, req.body.Product_ID],
+        [req.body.User_ID, req.body.Product_ID],
         function (err, results) {
             res.send(results || err)
         }
     )
 })
 
-route.get('/:Vendor_id', (req, res) => {
+route.get('/:User_ID', (req, res) => {
     const query = `SELECT *
-    FROM (SELECT * FROM carts WHERE Vendor_ID = ?) X
+    FROM (SELECT * FROM carts WHERE User_ID = ?) X
     INNER JOIN products
     ON products.Product_ID = X.Product_ID
     Limit ?, ?;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
     connection.query(
         query,
-        [req.params.Vendor_id, offset, 10],
+        [req.params.User_ID, offset, 10],
         function (err, results) {
             if (results) {
                 var price = 0;
@@ -57,8 +57,8 @@ route.get('/:Vendor_id', (req, res) => {
                     price += (element.product_qty * element.product_price);
                 });
                 connection.query(
-                    'SELECT COUNT(*) FROM carts WHERE Vendor_ID = ?',
-                    [req.params.Vendor_id],
+                    'SELECT COUNT(*) FROM carts WHERE User_ID = ?',
+                    [req.params.User_ID],
                     function (err, totalItems) {
                         if (totalItems) {
                             const resbody = {

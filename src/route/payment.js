@@ -35,6 +35,12 @@ route.post('/verification', (req, res) => {
             }
         )
         connection.query(
+            `delete from carts where User_ID = ?`,
+            [req.body.User_ID],
+            function (err, results) {
+            }
+        )
+        connection.query(
             query2,
             [req.body.payload.payment.entity.order_id],
             function (err, results) {
@@ -43,7 +49,13 @@ route.post('/verification', (req, res) => {
             }
         )
     } else {
-        res.status(401)
+        connection.query(
+            `delete from orders where orderId = ?`,
+            [req.body.payload.payment.entity.order_id],
+            function (err, results) {
+                console.log(results);
+            }
+        )
     }
 })
 
@@ -79,21 +91,15 @@ route.post('/razorpay', async (req, res) => {
         var nextWeek = new Date(firstDay.getTime() + 7 * 24 * 60 * 60 * 1000);
         console.log(nextWeek);
         connection.query(
-            `INSERT INTO orders (orderId, Vendor_ID, Product_ID, product_qty, status, delivery_date) SELECT ?, Vendor_ID,  Product_ID, product_qty, ?, DATE(?) FROM carts WHERE Vendor_ID = ?;`,
-            [response.id, `Awaiting Payment`, nextWeek, req.body.Vendor_ID],
+            `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM carts WHERE User_ID = ?;`,
+            [response.id, `Awaiting Payment`, nextWeek, firstDay, req.body.User_ID],
             function (err, results) {
-                connection.query(
-                    `delete from carts where Vendor_ID = ?`,
-                    [req.body.Vendor_ID],
-                    function (err, results) {
-                        res.json({
-                            id: response.id,
-                            currency: response.currency,
-                            amount: response.amount,
-                            response: response,
-                        })
-                    }
-                )
+                res.json({
+                    id: response.id,
+                    currency: response.currency,
+                    amount: response.amount,
+                    response: response,
+                })
                 console.log(results || err);
             }
         )
