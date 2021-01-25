@@ -20,6 +20,12 @@ connection.query(
       City varchar(100) NOT NULL,
       LastLogin datetime,
       deposit INT,
+      Shop_Owner_name varchar(50),
+      ShopGstno varchar(50),
+      ShopPhoneno varchar(50),
+      Shop_name varchar(100),
+      latitudes varchar(50),
+      longtitude varchar(50),
       PRIMARY KEY (User_ID)
   )`,
   function (err, result) {
@@ -29,10 +35,9 @@ connection.query(
 connection.query(
   `Create table IF NOT EXISTS products(
       Product_ID INT NOT NULL auto_increment,
-      Vendor_ID INT NOT NULL AUTO_INCREMENT,
+      Vendor_ID INT NOT NULL,
       product_name varchar(100),
       product_price varchar(100),
-      qty_kilos INT NOT NULL,
       qty_dozen INT Not NULL,
       expiry_date datetime not null,
       product_image VARCHAR(2083),

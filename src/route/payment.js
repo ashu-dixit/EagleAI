@@ -48,6 +48,14 @@ route.post('/verification', (req, res) => {
                 res.json({ status: 'ok' })
             }
         )
+        // connection.query(
+        //     `Update products set 'product_qty' = 'product_qty' - (select product_qty from Order where orderId = ? and Product_ID = ?) where Product_ID = ?`,
+        //     [req.body.payload.payment.entity.order_id],
+        //     function (err, results) {
+        //         console.log(results || err);
+        //         res.json({ status: 'ok' })
+        //     }
+        // )
     } else {
         connection.query(
             `delete from orders where orderId = ?`,

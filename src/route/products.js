@@ -15,12 +15,12 @@ route.post('/', (req, res) => {
 })
 route.get('/', (req, res) => {
     const query1 = `SELECT * FROM products limit ?, ?;`
-    const query2 = `SELECT * FROM products where Vendor_ID = ?;`
+    const query2 = `SELECT * FROM products where Vendor_ID = ?  limit ?, ?;;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
     if (req.body.Vendor_ID) {
         connection.query(
             query2,
-            [req.body.Product_ID],
+            [req.body.Product_ID, offset, 10],
             function (err, results) {
                 if(results){
                     res.status(200).json(results);
@@ -71,13 +71,6 @@ route.patch('/', (req, res) => {
 
 route.delete('/', (req, res) => {
     const query = 'DELETE FROM `products` WHERE Product_ID = ?'
-    connection.query(
-        query,
-        [req.body.Product_ID],
-        function (err, results) {
-            res.send(results || err);
-        }
-    )
     connection.query(
         query,
         [req.body.Product_ID],
