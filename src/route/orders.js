@@ -24,7 +24,7 @@ route.get('/:User_id', (req, res) => {
                             const resbody = {
                                 totalItems: totalItems[0]['COUNT(*)'],
                                 totalprice: price,
-                                cart: results
+                                orders: results
                             }
                             res.status(200).json(resbody);
                         } else {
