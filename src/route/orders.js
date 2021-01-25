@@ -1,6 +1,6 @@
 const route = require('express').Router()
 const connection = require('../sqldb').connection
-route.get('/:User_id', (req, res) => {
+route.get('/:User_ID', (req, res) => {
     const query = `select * 
     from (SELECT * FROM orders WHERE User_ID = ?) X
     INNER JOIN products
