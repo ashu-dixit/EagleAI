@@ -7,7 +7,7 @@ route.get('/', (req, res) => {
         query,
         [req.query.q],
         function (err, results) {
-            res.json(results);
+            res.json(results || err);
         }
     )
 })
