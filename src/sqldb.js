@@ -25,7 +25,7 @@ connection.query(
       ShopPhoneno varchar(50),
       Shop_name varchar(100),
       latitudes varchar(50),
-      longtitude varchar(50),
+      longitude varchar(50),
       PRIMARY KEY (User_ID)
   )`,
   function (err, result) {
