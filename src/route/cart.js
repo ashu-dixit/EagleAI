@@ -19,7 +19,7 @@ route.post('/', (req, res) => {
     )
 })
 
-route.put('/', (req, res) => {
+route.patch('/', (req, res) => {
     const query = `UPDATE carts set product_qty = ? WHERE User_ID = ? AND Product_ID = ?`
     connection.query(
         query,
