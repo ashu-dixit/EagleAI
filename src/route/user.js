@@ -28,12 +28,12 @@ route.post('/vendor', (req, res) => {
 })
 
 route.get('/customer/:id', (req, res) => {
-    const query = `Select User_ID, Name, MobNo1, MobNo2, Address, VERIFIED, City, LastLogin from users where user_ID = ?`
+    const query = `Select User_ID, Name, MobNo1, MobNo2, Address, VERIFIED, City, LastLogin from users where User_ID = ?`
     connection.query(query, [req.params.id], function (err, result) { console.log("HR"); res.send(result[0] || err) })
 })
 
 route.get('/vendor/:id', (req, res) => {
-    const query = `Select User_ID, Name, MobNo1, MobNo2, VERIFIED, LastLogin, deposit, Shop_Owner_name, ShopGstno, ShopPhoneno, Shop_name, latitudes, longtitude from users where user_ID = ?`
+    const query = `Select User_ID, Name, MobNo1, MobNo2, VERIFIED, LastLogin, deposit, Shop_Owner_name, ShopGstno, ShopPhoneno, Shop_name, latitudes, longtitude from users where User_ID = ?`
     connection.query(query, [req.params.id], function (err, result) { res.send(result || err) })
 })
 
