@@ -15,7 +15,7 @@ route.post('/', (req, res) => {
 })
 route.get('/', (req, res) => {
     const query1 = `SELECT * FROM products limit ?, ?;`
-    const query2 = `SELECT * FROM products where Vendor_ID = ?  limit ?, ?;;`
+    const query2 = `SELECT * FROM products where Vendor_ID = ? limit ?, ?;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
     if (req.body.Vendor_ID) {
         connection.query(
