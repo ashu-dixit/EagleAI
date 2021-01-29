@@ -13,28 +13,32 @@ route.post('/', (req, res) => {
         }
     )
 })
-route.get('/', (req, res) => {
-    const query1 = `SELECT * FROM products limit ?, ?;`
+route.get('/store', (req, res) => {
     const query2 = `SELECT * FROM products where Vendor_ID = ? limit ?, ?;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
-    if (req.body.Vendor_ID) {
-        connection.query(
-            query2,
-            [req.body.Vendor_ID, offset, 10],
-            function (err, results) {
-                if(results){
-                    res.status(200).json(results);
-                }else{
-                    res.status(400).json(err);
-                }
+
+    connection.query(
+        query2,
+        [req.body.Vendor_ID, offset, 10],
+        function (err, results) {
+            if (results) {
+                res.status(200).json(results);
+            } else {
+                res.status(400).json(err);
             }
-        )
-    } else if (req.query.pageno) {
+        }
+    )
+
+})
+route.get('/', (req, res) => {
+    const query1 = `SELECT * FROM products limit ?, ?;`
+    let offset = (parseInt(req.query.pageno) - 1) * 10
+    if (req.query.pageno) {
         connection.query(
             query1,
             [offset, 10],
             function (err, results) {
-                if(results){
+                if (results) {
                     connection.query(
                         'SELECT COUNT(*) As items FROM products',
                         function (err, totalItems) {
@@ -49,7 +53,7 @@ route.get('/', (req, res) => {
                             }
                         }
                     )
-                }else{
+                } else {
                     res.status(400).json(err);
                 }
             }
