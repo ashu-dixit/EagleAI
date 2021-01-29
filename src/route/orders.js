@@ -1,15 +1,18 @@
 const route = require('express').Router()
 const connection = require('../sqldb').connection
 route.get('/:User_ID', (req, res) => {
+    var firstDay = new Date();
+    var lastWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
     const query = `select * 
     from (SELECT * FROM orders WHERE User_ID = ?) X
     INNER JOIN products
     ON products.Product_ID = X.Product_ID
+    ORDER BY order_date DESC
     Limit ?, ?;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
     connection.query(
         query,
-        [req.params.User_ID, offset, 10],
+        [req.params.User_ID, lastWeek, offset, 10],
         function (err, results) {
             if (results) {
                 var price = 0;

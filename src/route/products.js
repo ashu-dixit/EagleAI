@@ -3,11 +3,11 @@ const connection = require('../sqldb').connection
 
 route.post('/', (req, res) => {
     const query = `INSERT INTO 
-                products (product_name, product_price, qty_kilos,qty_dozen, expiry_date, product_image, discount) 
+                products (Vendor_ID, product_name, product_price, qty_kilos,qty_dozen, expiry_date, product_image, discount) 
                 VALUE (?, ?, ?, ?, STR_TO_DATE(?, "%M %d %Y"), ?, ?);`
     connection.query(
         query,
-        [req.body.product_name, req.body.product_price, req.body.qty_kilos, req.body.qty_dozen, req.body.expiry_date, req.body.product_image, req.body.discount],
+        [req.body.Vendor_ID, req.body.product_name, req.body.product_price, req.body.qty_kilos, req.body.qty_dozen, req.body.expiry_date, req.body.product_image, req.body.discount],
         function (err, results) {
             res.send(results || err)
         }
