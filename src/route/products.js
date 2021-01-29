@@ -27,11 +27,19 @@ route.get('/store', (req, res) => {
                     [req.body.Vendor_ID],
                     function (err, totalItems) {
                         if (totalItems) {
-                            const resbody = {
-                                totalItems: totalItems[0]["items"],
-                                products: results
-                            }
-                            res.status(200).json(resbody);
+                            connection.query(
+                                `select deposit, VERIFIED from users where User_ID = ?`,
+                                [req.body.Vendor_ID],
+                                function (err, user_detail) {
+                                    const resbody = {
+                                        wallet: user_detail[0].deposit,
+                                        VERIFIED: user_detail[0].VERIFIED,
+                                        totalItems: totalItems[0]["items"],
+                                        products: results
+                                    }
+                                    res.status(200).json(resbody);   
+                                }
+                            )
                         } else {
                             res.status(400).json({ message: err });
                         }
