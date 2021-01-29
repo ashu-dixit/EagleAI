@@ -20,7 +20,7 @@ route.get('/', (req, res) => {
     if (req.body.Vendor_ID) {
         connection.query(
             query2,
-            [req.body.Product_ID, offset, 10],
+            [req.body.Vendor_ID, offset, 10],
             function (err, results) {
                 if(results){
                     res.status(200).json(results);
