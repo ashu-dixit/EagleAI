@@ -22,7 +22,21 @@ route.get('/store', (req, res) => {
         [req.body.Vendor_ID, offset, 10],
         function (err, results) {
             if (results) {
-                res.status(200).json(results);
+                connection.query(
+                    'SELECT COUNT(*) As items FROM products where Vendor_ID = ?',
+                    [req.body.Vendor_ID],
+                    function (err, totalItems) {
+                        if (totalItems) {
+                            const resbody = {
+                                totalItems: totalItems[0]["items"],
+                                products: results
+                            }
+                            res.status(200).json(resbody);
+                        } else {
+                            res.status(400).json({ message: err });
+                        }
+                    }
+                )
             } else {
                 res.status(400).json(err);
             }
