@@ -18,6 +18,7 @@ route.get('/orders', (req, res) => {
             connection.query(
                 `select * from orders where orders <> 'Delivery'`,
                 function (err, results) {
+                    console.log(err)
                     const re = {
                         orders: results,
                         data: data
