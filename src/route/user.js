@@ -28,7 +28,7 @@ route.post('/vendor', (req, res) => {
     )
 })
 
-route.get('/customer/:id', authcheck, (req, res) => {
+route.get('/customer/:id', (req, res) => {
     const query = `Select User_ID, Name, MobNo1, MobNo2, Address, VERIFIED, City, LastLogin from users where User_ID = ?`
     connection.query(query, [req.params.id], function (err, result) { console.log("HR"); res.send(result[0] || err) })
 })
@@ -42,7 +42,7 @@ route.get('/vendor/all', (req, res) => {
     const query = `Select User_ID, Name, MobNo1, MobNo2, VERIFIED, LastLogin, deposit, Shop_Owner_name, ShopGstno, ShopPhoneno, Shop_name, latitudes, longitude from users where VERIFIED = 1`
     connection.query(query, function (err, result) { res.send(result[0] || err) })
 })
-route.get('/customer/all', authcheck, (req, res) => {
+route.get('/customer/all', (req, res) => {
     const query = `Select User_ID, Name, MobNo1, MobNo2, Address, VERIFIED, City, LastLogin from users`
     connection.query(query, function (err, result) { console.log("HR"); res.send(result[0] || err) })
 })
