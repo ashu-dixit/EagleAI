@@ -22,6 +22,7 @@ route.get('/orders', (req, res) => {
                         orders: results,
                         data: data
                     }
+                    res.json(re)
                 }
             )
         }
