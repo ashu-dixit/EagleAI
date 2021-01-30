@@ -1,5 +1,6 @@
 const route = require('express').Router()
 const connection = require('../sqldb').connection
+const authcheck = require('./authmiddleware').authcheck
 
 route.post('/customer', (req, res) => {
     const query = `INSERT INTO 
@@ -27,7 +28,7 @@ route.post('/vendor', (req, res) => {
     )
 })
 
-route.get('/customer/:id', (req, res) => {
+route.get('/customer/:id', authcheck, (req, res) => {
     const query = `Select User_ID, Name, MobNo1, MobNo2, Address, VERIFIED, City, LastLogin from users where User_ID = ?`
     connection.query(query, [req.params.id], function (err, result) { console.log("HR"); res.send(result[0] || err) })
 })
@@ -36,6 +37,16 @@ route.get('/vendor/:id', (req, res) => {
     const query = `Select User_ID, Name, MobNo1, MobNo2, VERIFIED, LastLogin, deposit, Shop_Owner_name, ShopGstno, ShopPhoneno, Shop_name, latitudes, longitude from users where User_ID = ?`
     connection.query(query, [req.params.id], function (err, result) { res.send(result[0] || err) })
 })
+
+route.get('/vendor/all', (req, res) => {
+    const query = `Select User_ID, Name, MobNo1, MobNo2, VERIFIED, LastLogin, deposit, Shop_Owner_name, ShopGstno, ShopPhoneno, Shop_name, latitudes, longitude from users where VERIFIED = 1`
+    connection.query(query, function (err, result) { res.send(result[0] || err) })
+})
+route.get('/customer/all', authcheck, (req, res) => {
+    const query = `Select User_ID, Name, MobNo1, MobNo2, Address, VERIFIED, City, LastLogin from users`
+    connection.query(query, function (err, result) { console.log("HR"); res.send(result[0] || err) })
+})
+
 
 route.patch('/customer', (req, res) => {
     const query = `UPDATE users set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, VERIFIED =  ?, city = ? WHERE User_ID = ?;`

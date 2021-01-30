@@ -1,18 +1,18 @@
 const route = require('express').Router()
 const connection = require('../sqldb').connection
 route.get('/:User_ID', (req, res) => {
-    var firstDay = new Date();
-    var lastWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
     const query = `select * 
     from (SELECT * FROM orders WHERE User_ID = ?) X
     INNER JOIN products
     ON products.Product_ID = X.Product_ID
+    WHERE order_date >= curdate() - INTERVAL DAYOFWEEK(curdate())+6 DAY
+    AND order_date < curdate() - INTERVAL DAYOFWEEK(curdate())-1 DAY
     ORDER BY order_date DESC
     Limit ?, ?;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
     connection.query(
         query,
-        [req.params.User_ID, lastWeek, offset, 10],
+        [req.params.User_ID, offset, 10],
         function (err, results) {
             if (results) {
                 var price = 0;
@@ -42,6 +42,14 @@ route.get('/:User_ID', (req, res) => {
     )
 })
 
+route.get('/all', (req, res) => {
+    connection.query(
+        'Select * from orders where status <> Delivered',
+        function(err, data){
+            res.json(data || err)
+        }
+    )
+})
 
 route.patch('/', (req, res) => {
     const query = `UPDATE orders SET status = ?, delivery_date = STR_TO_DATE(?, "%M %d %Y") WHERE OrderId = ? and Product_ID = ?`
@@ -53,16 +61,5 @@ route.patch('/', (req, res) => {
         }
     )
 })
-
-// route.delete('/', (req, res) => {
-//     const query = 'DELETE FROM `order_items` WHERE id = ?'
-//     connection.query(
-//         query,
-//         [req.body.id],
-//         function (err, results) {
-//             res.send(results || err);
-//         }
-//     )
-// })
 
 exports = module.exports = { route }
