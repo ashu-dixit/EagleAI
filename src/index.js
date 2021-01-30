@@ -15,5 +15,7 @@ app.use('/pay', require('./route/payment').route)
 app.use('/profile', require('./route/user').route)
 app.use('/search', require('./route/search').route)
 app.use('/auth', require('./route/auth').route)
+app.use('/admin', require('./route/admin').route)
+
 
 app.listen(PORT, () => console.log("Hello"));

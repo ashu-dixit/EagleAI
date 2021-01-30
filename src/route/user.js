@@ -38,15 +38,6 @@ route.get('/vendor/:id', (req, res) => {
     connection.query(query, [req.params.id], function (err, result) { res.send(result[0] || err) })
 })
 
-route.get('/allvendor/', (req, res) => {
-    const query = `Select User_ID, Name, MobNo1, MobNo2, VERIFIED, LastLogin, deposit, Shop_Owner_name, ShopGstno, ShopPhoneno, Shop_name, latitudes, longitude from users where VERIFIED = 1`
-    connection.query(query, function (err, result) { res.send(result || err) })
-})
-route.get('/allcustomer/', (req, res) => {
-    const query = `Select User_ID, Name, MobNo1, MobNo2, Address, VERIFIED, City, LastLogin from users`
-    connection.query(query, function (err, result) { console.log("HR"); res.send(result || err) })
-})
-
 
 route.patch('/customer', (req, res) => {
     const query = `UPDATE users set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, VERIFIED =  ?, city = ? WHERE User_ID = ?;`

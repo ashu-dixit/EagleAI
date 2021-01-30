@@ -42,15 +42,6 @@ route.get('/:User_ID', (req, res) => {
     )
 })
 
-route.get('/all', (req, res) => {
-    connection.query(
-        'Select * from orders where status <> Delivered',
-        function(err, data){
-            res.json(data || err)
-        }
-    )
-})
-
 route.patch('/', (req, res) => {
     const query = `UPDATE orders SET status = ?, delivery_date = STR_TO_DATE(?, "%M %d %Y") WHERE OrderId = ? and Product_ID = ?`
     connection.query(
