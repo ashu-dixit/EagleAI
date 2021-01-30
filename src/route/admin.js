@@ -13,10 +13,10 @@ route.get('/customers/', (req, res) => {
 
 route.get('/orders', (req, res) => {
     connection.query(
-        `select count(*) from orders group by status`,
+        `select status, count(*) from orders group by status`,
         function (err, data) {
             connection.query(
-                `select * from orders where orders <> 'Delivery'`,
+                `select * from orders where status <> 'Delivery'`,
                 function (err, results) {
                     console.log(err)
                     const re = {
