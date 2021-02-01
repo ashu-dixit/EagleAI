@@ -13,23 +13,23 @@ route.post('/', (req, res) => {
         }
     )
 })
-route.get('/store', (req, res) => {
+route.get('/store/:id', (req, res) => {
     const query2 = `SELECT * FROM products where Vendor_ID = ? limit ?, ?;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
 
     connection.query(
         query2,
-        [req.body.Vendor_ID, offset, 10],
+        [req.params.Vendor_ID, offset, 10],
         function (err, results) {
             if (results) {
                 connection.query(
                     'SELECT COUNT(*) As items FROM products where Vendor_ID = ?',
-                    [req.body.Vendor_ID],
+                    [req.params.Vendor_ID],
                     function (err, totalItems) {
                         if (totalItems) {
                             connection.query(
                                 `select deposit, VERIFIED from users where User_ID = ?`,
-                                [req.body.Vendor_ID],
+                                [req.params.Vendor_ID],
                                 function (err, user_detail) {
                                     const resbody = {
                                         wallet: user_detail[0].deposit,
