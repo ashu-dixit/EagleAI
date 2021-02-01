@@ -13,7 +13,7 @@ route.post('/', (req, res) => {
         }
     )
 })
-route.get('/store/:id', (req, res) => {
+route.get('/store/:Vendor_ID', (req, res) => {
     const query2 = `SELECT * FROM products where Vendor_ID = ? limit ?, ?;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
 
