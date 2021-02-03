@@ -3,6 +3,7 @@ const shortid = require('shortid')
 const Razorpay = require('razorpay')
 const razorpaykey = require('../../config').Razorpay
 const { connection } = require('../sqldb')
+const { authcheck } = require('./authmiddleware')
 
 const razorpay = new Razorpay({
     key_id: razorpaykey.key_id,
@@ -48,14 +49,6 @@ route.post('/verification', (req, res) => {
                 res.json({ status: 'ok' })
             }
         )
-        // connection.query(
-        //     `Update products set 'product_qty' = 'product_qty' - (select product_qty from Order where orderId = ? and Product_ID = ?) where Product_ID = ?`,
-        //     [req.body.payload.payment.entity.order_id],
-        //     function (err, results) {
-        //         console.log(results || err);
-        //         res.json({ status: 'ok' })
-        //     }
-        // )
     } else {
         connection.query(
             `delete from orders where orderId = ?`,
@@ -83,7 +76,7 @@ route.post('/verify', (req, res) => {
     )
 })
 
-route.post('/razorpay', checkwalet, async (req, res) => {
+route.post('/razorpay', checkwalet, authcheck, async (req, res) => {
     const payment_capture = 1
     const options = {
         amount: parseInt(req.body.grandTotal) * 100,
@@ -117,10 +110,10 @@ route.post('/razorpay', checkwalet, async (req, res) => {
 })
 
 function checkwalet(req, res, next) {
-    const usewallet = false;
+    const usewallet = req.body.usewallet;
     if (usewallet) {
         connection.query(
-            `select deposit from users where User_ID = ?`,
+            `select deposit from user where User_ID = ?`,
             [req.body.User_ID],
             function (err, amount) {
                 if (amount[0] > req.body.grandTotal) {
@@ -128,13 +121,13 @@ function checkwalet(req, res, next) {
                     var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
                     var order_id = shortid.generate()
                     connection.query(
-                        `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM carts WHERE User_ID = ?;`,
+                        `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
                         [order_id, `Awaiting Payment`, nextWeek, firstDay, req.body.User_ID],
                         function (err, results) {
                             console.log(results || err);
                         }
                     )
-                    const query = `INSERT INTO transactions (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
+                    const query = `INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
                     connection.query(
                         query,
                         [order_id, shortid.generate(), req.body.type, 'Debit', 'Success'],
@@ -143,7 +136,7 @@ function checkwalet(req, res, next) {
                         }
                     )
                     connection.query(
-                        `delete from carts where User_ID = ?`,
+                        `delete from cart where User_ID = ?`,
                         [req.body.User_ID],
                         function (err, results) {
                             console.log(results || err);
@@ -158,17 +151,18 @@ function checkwalet(req, res, next) {
                         }
                     )
                     connection.query(
-                        `update users set deposit = ? where User_ID = ?`,
+                        `update user set deposit = ? where User_ID = ?`,
                         [amount[0] - req.body.grandTotal, req.body.User_ID],
                         function (err, results) {
                             console.log(results || err);
                         }
                     )
                     res.json(res.json({
-                        id: order_id
+                        id: order_id,
+                        wallet: true
                     }))
                 } else {
-                    return next()
+                    res.json({ message: "Not enough Balance in wallet" })
                 }
             }
         )

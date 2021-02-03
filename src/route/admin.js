@@ -1,14 +1,13 @@
 const route = require('express').Router()
 const connection = require('../sqldb').connection
 
-
 route.get('/vendors/', (req, res) => {
-    const query = `Select User_ID, Name, MobNo1, MobNo2, VERIFIED, LastLogin, deposit, Shop_Owner_name, ShopGstno, ShopPhoneno, Shop_name, latitudes, longitude from users where VERIFIED = 1`
+    const query = `Select User_ID, Name, MobNo1, MobNo2, VERIFIED, LastLogin, deposit, Shop_Owner_name, ShopGstno, ShopPhoneno, Shop_name, latitudes, longitude from user where VERIFIED = 1`
     connection.query(query, function (err, result) { res.send(result || err) })
 })
 route.get('/customers/', (req, res) => {
-    const query = `Select User_ID, Name, MobNo1, MobNo2, Address, VERIFIED, City, LastLogin from users`
-    connection.query(query, function (err, result) { console.log("HR"); res.send(result || err) })
+    const query = `Select User_ID, Name, MobNo1, MobNo2, Address, VERIFIED, City, LastLogin from user`
+    connection.query(query, function (err, result) { res.send(result || err) })
 })
 
 route.get('/orders', (req, res) => {
@@ -30,12 +29,81 @@ route.get('/orders', (req, res) => {
     )
 
 })
+route.get('/products', (req, res) => {
+    const query1 = `SELECT * FROM product;`
+    if (req.query.pageno) {
+        connection.query(
+            query1,
+            function (err, results) {
+                if (results) {
+                    res.status(200).json(results);
+                } else {
+                    res.status(400).json(err);
+                }
+            }
+        )
+    }
+
+})
 route.get('/transactions', (req, res) => {
 
     connection.query(
-        `Select * from transactions where status <> 'Failed'`,
+        `Select * from transaction where status <> 'Failed'`,
         function (err, data) {
             res.json(data || err)
+        }
+    )
+})
+route.patch('/orders', (req, res) => {
+    const query = `UPDATE orders SET status = ?, delivery_date = STR_TO_DATE(?, "%M %d %Y") WHERE OrderId = ? and Product_ID = ?`
+    connection.query(
+        query,
+        [req.body.status, req.body.delivery_date, req.body.OrderId, req.body.Product_ID],
+        function (err, results) {
+            res.send(results || err);
+        }
+    )
+})
+
+route.patch('/products', (req, res) => {
+    const query = `UPDATE product set Vendor_ID = ?, product_name = ?, product_price = ?, qty_kilos = ?, qty_dozen = ?, expiry_date =  STR_TO_DATE(?, "%M %d %Y"), product_image = ?, discount = ? WHERE Product_ID = ?;`
+    connection.query(
+        query,
+        [res.body.User_ID, req.body.product_name, req.body.product_price, req.body.qty_kilos, req.body.qty_dozen, req.body.expiry_date, req.body.product_image, req.body.discount, req.body.Product_ID],
+        function (err, results) {
+            res.send(results || err);
+        }
+    )
+})
+
+route.patch('/customer', (req, res) => {
+    const query = `UPDATE user set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, VERIFIED =  ?, city = ? WHERE User_ID = ?;`
+    connection.query(
+        query,
+        [req.body.Name, req.body.MobNo1, req.body.MobNo2, req.body.Address, req.body.VERIFIED, req.body.City, res.body.User_ID],
+        function (err, results) {
+            res.send(results || err);
+        }
+    )
+})
+
+route.patch('/vendor', (req, res) => {
+    const query = `UPDATE user set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, VERIFIED =  ?, city = ?, deposit = ?, Shop_Owner_name = ?, ShopGstno = ?, ShopPhoneno = ?, Shop_name = ?, latitudes = ?, longitude = ? WHERE User_ID = ?;`
+    connection.query(
+        query,
+        [req.body.Name, req.body.MobNo1, req.body.MobNo2, req.body.Address, req.body.VERIFIED, req.body.City, req.body.deposit, req.body.Shop_Owner_name, req.body.ShopGstno, req.body.ShopPhoneno, req.body.Shop_name, req.body.latitudes, req.body.longtitude, res.body.User_ID],
+        function (err, results) {
+            res.send(results || err);
+        }
+    )
+})
+route.post('/products', (req, res) => {
+    const query = `INSERT INTO product (Vendor_ID, product_name, product_price, qty_kilos,qty_dozen, expiry_date, product_image, discount,category, disabled) VALUE (?, ?, ?, ?, ?, STR_TO_DATE(?, "%M %d %Y"), ?, ?, ?, ?);`
+    connection.query(
+        query,
+        [res.body.User_ID, req.body.product_name, req.body.product_price, req.body.qty_kilos, req.body.qty_dozen, req.body.expiry_date, req.body.product_image, req.body.discount, req.body.category, 'true'],
+        function (err, results) {
+            res.send(results || err)
         }
     )
 })

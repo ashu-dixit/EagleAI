@@ -1,21 +1,34 @@
 const JWT = require('jsonwebtoken')
 const JWTsecret = require('../../config').JWTsecret
+const connection = require('../sqldb').connection
 const authcheck = (req, res, next) => {
     const token = (req.headers['authorization']);
-    // console.log(token);
-    if(token){
+    if (token) {
         JWT.verify(token, JWTsecret, (err, decodeToken) => {
-            if(err){
+            if (err) {
                 console.log(err);
-                res.json({message: 'Not Authorised'})
-            }else{
-                res.locals.User_ID = decodeToken.id
-                console.log(decodeToken)
-                next()
+                res.json({ message: 'Not Authorised' })
+            } else {
+                connection.query(
+                    'select * from user where User_ID = ?',
+                    [decodeToken.id],
+                    function (err, users) {
+                        if (users) {
+                            res.locals.user = users[0]
+                            next()
+                        } else {
+                            res.json({ message: 'User not found', err })
+                        }
+
+                    }
+                )
             }
         })
-    }else{
-        res.json({message: 'Not Authorised'})
+    } else {
+        res.json({ message: 'Not Authorised' })
     }
+}
+const authcheckadmin = (res, req, next) => {
+
 }
 exports = module.exports = { authcheck }

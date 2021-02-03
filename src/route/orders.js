@@ -1,18 +1,18 @@
 const route = require('express').Router()
 const connection = require('../sqldb').connection
-route.get('/:User_ID', (req, res) => {
+route.get('/', (req, res) => {
     const query = `select * 
     from (SELECT * FROM orders WHERE User_ID = ?) X
     INNER JOIN products
     ON products.Product_ID = X.Product_ID
-    WHERE order_date >= curdate() - INTERVAL DAYOFWEEK(curdate())+6 DAY
-    AND order_date < curdate() - INTERVAL DAYOFWEEK(curdate())-1 DAY
+    WHERE order_date >= curdate() - INTERVAL DAYOFWEEK(curdate()) + ? DAY
+    AND order_date <= curdate()
     ORDER BY order_date DESC
     Limit ?, ?;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
     connection.query(
         query,
-        [req.params.User_ID, offset, 10],
+        [res.locals.user.User_ID, days, offset, 10],
         function (err, results) {
             if (results) {
                 var price = 0;
@@ -21,7 +21,7 @@ route.get('/:User_ID', (req, res) => {
                 });
                 connection.query(
                     'SELECT COUNT(*) FROM orders WHERE User_ID = ?',
-                    [req.params.User_ID],
+                    [req.locals.User_ID],
                     function (err, totalItems) {
                         if (totalItems) {
                             const resbody = {
@@ -41,16 +41,4 @@ route.get('/:User_ID', (req, res) => {
         }
     )
 })
-
-route.patch('/', (req, res) => {
-    const query = `UPDATE orders SET status = ?, delivery_date = STR_TO_DATE(?, "%M %d %Y") WHERE OrderId = ? and Product_ID = ?`
-    connection.query(
-        query,
-        [req.body.status, req.body.delivery_date, req.body.OrderId, req.body.Product_ID],
-        function (err, results) {
-            res.send(results || err);
-        }
-    )
-})
-
 exports = module.exports = { route }
