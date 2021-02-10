@@ -12,8 +12,9 @@ route.get('/', (req, res) => {
     let offset = (parseInt(req.query.pageno) - 1) * 10
     connection.query(
         query,
-        [res.locals.user.User_ID, req.query.strtday, req.query.endday, req.query.status, offset, 10],
+        [res.locals.user.User_ID, req.query.strtday, req.query.endday, offset, 10],
         function (err, results) {
+            console.log(err)
             if (results) {
                 var price = 0;
                 results.forEach(element => {
@@ -21,7 +22,7 @@ route.get('/', (req, res) => {
                 });
                 connection.query(
                     'SELECT COUNT(*) FROM orders WHERE User_ID = ?',
-                    [req.locals.User_ID, req.query],
+                    [res.locals.user.User_ID, req.query],
                     function (err, totalItems) {
                         if (totalItems) {
                             const resbody = {
