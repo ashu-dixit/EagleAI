@@ -3,16 +3,16 @@ const connection = require('../sqldb').connection
 route.get('/', (req, res) => {
     const query = `select * 
     from (SELECT * FROM orders WHERE User_ID = ?) X
-    INNER JOIN products
-    ON products.Product_ID = X.Product_ID
-    WHERE order_date >= curdate() - INTERVAL DAYOFWEEK(curdate()) + ? DAY
-    AND order_date <= curdate()
+    INNER JOIN product
+    ON product.Product_ID = X.Product_ID
+    WHERE order_date <= curdate() - INTERVAL DAYOFWEEK(curdate()) + ? DAY
+    AND order_date >= curdate() - INTERVAL DAYOFWEEK(curdate()) + ? DAY
     ORDER BY order_date DESC
     Limit ?, ?;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
     connection.query(
         query,
-        [res.locals.user.User_ID, days, offset, 10],
+        [res.locals.user.User_ID, req.query.strtday, req.query.endday, req.query.status, offset, 10],
         function (err, results) {
             if (results) {
                 var price = 0;
@@ -21,7 +21,7 @@ route.get('/', (req, res) => {
                 });
                 connection.query(
                     'SELECT COUNT(*) FROM orders WHERE User_ID = ?',
-                    [req.locals.User_ID],
+                    [req.locals.User_ID, req.query],
                     function (err, totalItems) {
                         if (totalItems) {
                             const resbody = {
