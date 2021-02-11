@@ -84,8 +84,8 @@ route.post('/razorpay', authcheck, async (req, res) => {
         receipt: shortid.generate(),
         payment_capture
     }
-    console.log(res.locals)
     const usewallet = req.body.usewallet;
+    console.log(usewallet)
     if (usewallet) {
         checkwalet(req, res)
     } else {
