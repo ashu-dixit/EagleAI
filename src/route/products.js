@@ -50,6 +50,7 @@ route.get('/store', (req, res) => {
 })
 route.get('/', (req, res) => {
     const query1 = `SELECT * FROM product where Vendor_ID <> ? limit ?, ?;`
+    console.log(res.locals.user)
     let offset = (parseInt(req.query.pageno) - 1) * 10
     if (req.query.pageno) {
         connection.query(

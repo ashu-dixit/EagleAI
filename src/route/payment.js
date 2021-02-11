@@ -157,10 +157,9 @@ function checkwalet(req, res, next) {
                             console.log(results || err);
                         }
                     )
-                    res.json(res.json({
+                    res.json({
                         id: order_id,
-                        wallet: true
-                    }))
+                        wallet: true})
                 } else {
                     res.json({ message: "Not enough Balance in wallet" })
                 }
