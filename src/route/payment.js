@@ -36,7 +36,7 @@ route.post('/verification', (req, res) => {
             }
         )
         connection.query(
-            `delete from carts where User_ID = ?`,
+            `delete from cart where User_ID = ?`,
             [req.body.User_ID],
             function (err, results) {
             }
@@ -96,7 +96,7 @@ route.post('/razorpay', authcheck, async (req, res) => {
             var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
             console.log(nextWeek);
             connection.query(
-                `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM carts WHERE User_ID = ?;`,
+                `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
                 [response.id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
                 function (err, results) {
                     res.json({
