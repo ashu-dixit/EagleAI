@@ -123,12 +123,11 @@ function checkwalet(req, res) {
                 var firstDay = new Date();
                 var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
                 var order_id = shortid.generate()
-                // console.log(amount[0] + " " + res.locals.user.User_ID)
                 connection.query(
                     `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
                     [order_id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
                     function (err, results) {
-                        // console.log(results || err + " " + 1);
+                        console.log(results || err + " " + 1);
                     }
                 )
                 const query = `INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
@@ -136,14 +135,14 @@ function checkwalet(req, res) {
                     query,
                     [order_id, shortid.generate(), req.body.type, 'Debit', 'Success'],
                     function (err, results) {
-                        // console.log(results || err + " " + 2);
+                        console.log(results || err + " " + 2);
                     }
                 )
                 connection.query(
                     `delete from cart where User_ID = ?`,
                     [res.locals.user.User_ID],
                     function (err, results) {
-                        // console.log((results || err) + " " + 3);
+                        console.log((results || err) + " " + 3);
                     }
                 )
                 const query2 = `UPDATE orders SET status = 'Awaiting Fulfillment' WHERE orderId = ?`
@@ -151,12 +150,12 @@ function checkwalet(req, res) {
                     query2,
                     [order_id],
                     function (err, results) {
-                        // console.log((results || err));
+                        console.log((results || err));
                     }
                 )
                 connection.query(
                     `update user set deposit = ? where User_ID = ?`,
-                    [amount[0] - req.body.grandTotal, res.locals.user.User_ID],
+                    [amount[0]['deposit'] - req.body.grandTotal, res.locals.user.User_ID],
                     function (err, results) {
                         console.log((results || err) + " " + 5);
                     }
