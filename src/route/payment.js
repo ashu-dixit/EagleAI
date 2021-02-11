@@ -76,7 +76,7 @@ route.post('/verify', (req, res) => {
     )
 })
 
-route.post('/razorpay', checkwalet, authcheck, async (req, res) => {
+route.post('/razorpay', authcheck, checkwalet, async (req, res) => {
     const payment_capture = 1
     const options = {
         amount: parseInt(req.body.grandTotal) * 100,
@@ -114,12 +114,13 @@ function checkwalet(req, res, next) {
     if (usewallet) {
         connection.query(
             `select deposit from user where User_ID = ?`,
-            [req.body.User_ID],
+            [res.locals.user.User_ID],
             function (err, amount) {
                 if (amount[0] > req.body.grandTotal) {
                     var firstDay = new Date();
                     var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
                     var order_id = shortid.generate()
+                    console.log(amount[0])
                     connection.query(
                         `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
                         [order_id, `Awaiting Payment`, nextWeek, firstDay, req.body.User_ID],
@@ -159,7 +160,8 @@ function checkwalet(req, res, next) {
                     )
                     res.json({
                         id: order_id,
-                        wallet: true})
+                        wallet: true
+                    })
                 } else {
                     res.json({ message: "Not enough Balance in wallet" })
                 }
