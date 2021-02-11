@@ -5,8 +5,8 @@ route.get('/', (req, res) => {
     from (SELECT * FROM orders WHERE User_ID = ?) X
     INNER JOIN product
     ON product.Product_ID = X.Product_ID
-    WHERE order_date <= curdate() - INTERVAL DAYOFWEEK(curdate()) + ? DAY
-    AND order_date >= curdate() - INTERVAL DAYOFWEEK(curdate()) + ? DAY
+    WHERE order_date <= now() - INTERVAL ? DAY
+    AND order_date >= now() - INTERVAL ? DAY
     ORDER BY order_date DESC
     Limit ?, ?;`
     let offset = (parseInt(req.query.pageno) - 1) * 10
