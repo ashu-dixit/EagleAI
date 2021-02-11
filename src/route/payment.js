@@ -25,28 +25,36 @@ route.post('/verification', (req, res) => {
     console.log(digest, req.headers['x-razorpay-signature'])
 
     if (digest === req.headers['x-razorpay-signature']) {
+
         console.log(req.body.payload.payment.entity)
-        const query = `INSERT INTO transactions (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
-        const query2 = `UPDATE orders SET status = 'Awaiting Fulfillment' WHERE orderId = ?`
         connection.query(
-            query,
-            [req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.type, 'Debit', 'Success'],
-            function (err, results) {
-                console.log(results || err);
-            }
-        )
-        connection.query(
-            `delete from cart where User_ID = ?`,
-            [req.body.User_ID],
-            function (err, results) {
-            }
-        )
-        connection.query(
-            query2,
+            'select User_ID from orders where orderID = ?',
             [req.body.payload.payment.entity.order_id],
-            function (err, results) {
-                console.log(results || err);
-                res.json({ status: 'ok' })
+            function (err, user) {
+                const query = `INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
+                const query2 = `UPDATE orders SET status = 'Awaiting Fulfillment' WHERE orderId = ?`
+                connection.query(
+                    query,
+                    [req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.payload.payment.entity.method, 'Debit', 'Success'],
+                    function (err, results) {
+                        console.log(results || err);
+                    }
+                )
+                connection.query(
+                    `delete from cart where User_ID = ?`,
+                    [user[0]['User_ID']],
+                    function (err, results) {
+                        console.log(results || err);
+                    }
+                )
+                connection.query(
+                    query2,
+                    [req.body.payload.payment.entity.order_id],
+                    function (err, results) {
+                        console.log(results || err);
+                        res.json({ status: 'ok' })
+                    }
+                )
             }
         )
     } else {
@@ -62,12 +70,12 @@ route.post('/verification', (req, res) => {
 
 route.post('/verify', (req, res) => {
     // do a validation
-    const query = `SELECT status FROM transactions WHERE OrderID = ?`
+    const query = `SELECT status FROM transaction WHERE OrderID = ?`
     connection.query(
         query,
         [req.body.orderId],
         function (err, results) {
-            if (results.length === 0) {
+            if (err != null && results.length === 0) {
                 res.json({ status: 'Failed' })
             } else {
                 res.json(results[0] || err)
