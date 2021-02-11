@@ -76,7 +76,7 @@ route.post('/verify', (req, res) => {
     )
 })
 
-route.post('/razorpay', authcheck, checkwalet, async (req, res) => {
+route.post('/razorpay', authcheck, async (req, res) => {
     const payment_capture = 1
     const options = {
         amount: parseInt(req.body.grandTotal) * 100,
@@ -84,93 +84,92 @@ route.post('/razorpay', authcheck, checkwalet, async (req, res) => {
         receipt: shortid.generate(),
         payment_capture
     }
-
-    try {
-        console.log(options);
-        const response = await razorpay.orders.create(options)
-        var firstDay = new Date();
-        var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
-        console.log(nextWeek);
-        connection.query(
-            `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM carts WHERE User_ID = ?;`,
-            [response.id, `Awaiting Payment`, nextWeek, firstDay, req.body.User_ID],
-            function (err, results) {
-                res.json({
-                    id: response.id,
-                    currency: response.currency,
-                    amount: response.amount,
-                    response: response,
-                })
-                console.log(results || err);
-            }
-        )
-    } catch (error) {
-        console.log(error)
+    console.log(res.locals)
+    const usewallet = req.body.usewallet;
+    if (usewallet) {
+        checkwalet(req, res)
+    } else {
+        try {
+            console.log(options);
+            const response = await razorpay.orders.create(options)
+            var firstDay = new Date();
+            var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
+            console.log(nextWeek);
+            connection.query(
+                `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM carts WHERE User_ID = ?;`,
+                [response.id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
+                function (err, results) {
+                    res.json({
+                        id: response.id,
+                        currency: response.currency,
+                        amount: response.amount,
+                        response: response,
+                    })
+                    console.log(results || err);
+                }
+            )
+        } catch (error) {
+            console.log(error)
+        }
     }
 })
 
-function checkwalet(req, res, next) {
-    const usewallet = req.body.usewallet;
-    if (usewallet) {
-        connection.query(
-            `select deposit from user where User_ID = ?`,
-            [res.locals.user.User_ID],
-            function (err, amount) {
-                if (amount[0] > req.body.grandTotal) {
-                    var firstDay = new Date();
-                    var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
-                    var order_id = shortid.generate()
-                    console.log(amount[0])
-                    connection.query(
-                        `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
-                        [order_id, `Awaiting Payment`, nextWeek, firstDay, req.body.User_ID],
-                        function (err, results) {
-                            console.log(results || err);
-                        }
-                    )
-                    const query = `INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
-                    connection.query(
-                        query,
-                        [order_id, shortid.generate(), req.body.type, 'Debit', 'Success'],
-                        function (err, results) {
-                            console.log(results || err);
-                        }
-                    )
-                    connection.query(
-                        `delete from cart where User_ID = ?`,
-                        [req.body.User_ID],
-                        function (err, results) {
-                            console.log(results || err);
-                        }
-                    )
-                    const query2 = `UPDATE orders SET status = 'Awaiting Fulfillment' WHERE orderId = ?`
-                    connection.query(
-                        query2,
-                        [order_id],
-                        function (err, results) {
-                            console.log(results || err);
-                        }
-                    )
-                    connection.query(
-                        `update user set deposit = ? where User_ID = ?`,
-                        [amount[0] - req.body.grandTotal, req.body.User_ID],
-                        function (err, results) {
-                            console.log(results || err);
-                        }
-                    )
-                    res.json({
-                        id: order_id,
-                        wallet: true
-                    })
-                } else {
-                    res.json({ message: "Not enough Balance in wallet" })
-                }
+function checkwalet(req, res) {
+    connection.query(
+        `select deposit from user where User_ID = ?`,
+        [res.locals.user.User_ID],
+        function (err, amount) {
+            if (amount[0] > req.body.grandTotal) {
+                var firstDay = new Date();
+                var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
+                var order_id = shortid.generate()
+                console.log(amount[0] + " " + res.locals.user.User_ID)
+                connection.query(
+                    `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
+                    [order_id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
+                    function (err, results) {
+                        console.log(results || err + " " + 1);
+                    }
+                )
+                const query = `INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
+                connection.query(
+                    query,
+                    [order_id, shortid.generate(), req.body.type, 'Debit', 'Success'],
+                    function (err, results) {
+                        console.log(results || err + " " + 2);
+                    }
+                )
+                connection.query(
+                    `delete from cart where User_ID = ?`,
+                    [res.locals.user.User_ID],
+                    function (err, results) {
+                        console.log((results || err) + " " + 3);
+                    }
+                )
+                const query2 = `UPDATE orders SET status = 'Awaiting Fulfillment' WHERE orderId = ?`
+                connection.query(
+                    query2,
+                    [order_id],
+                    function (err, results) {
+                        console.log((results || err) + " " + 4);
+                    }
+                )
+                connection.query(
+                    `update user set deposit = ? where User_ID = ?`,
+                    [amount[0] - req.body.grandTotal, res.locals.user.User_ID],
+                    function (err, results) {
+                        console.log((results || err) + " " + 5);
+                    }
+                )
+                res.json({
+                    id: order_id,
+                    wallet: true
+                })
+            } else {
+                res.json({ message: "Not enough Balance in wallet" })
             }
-        )
-    } else {
-        return next()
-    }
-
+        }
+    )
 }
 
 exports = module.exports = { route }
