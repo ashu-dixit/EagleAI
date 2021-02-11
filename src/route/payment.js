@@ -85,7 +85,6 @@ route.post('/razorpay', authcheck, async (req, res) => {
         payment_capture
     }
     const usewallet = req.body.usewallet;
-    console.log(usewallet)
     if (usewallet) {
         checkwalet(req, res)
     } else {
@@ -119,6 +118,7 @@ function checkwalet(req, res) {
         `select deposit from user where User_ID = ?`,
         [res.locals.user.User_ID],
         function (err, amount) {
+            console.log(amount[0] > req.body.grandTotal)
             if (amount[0] > req.body.grandTotal) {
                 var firstDay = new Date();
                 var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
