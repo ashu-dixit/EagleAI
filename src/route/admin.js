@@ -31,19 +31,16 @@ route.get('/orders', (req, res) => {
 })
 route.get('/products', (req, res) => {
     const query1 = `SELECT * FROM product;`
-    if (req.query.pageno) {
-        connection.query(
-            query1,
-            function (err, results) {
-                if (results) {
-                    res.status(200).json(results);
-                } else {
-                    res.status(400).json(err);
-                }
+    connection.query(
+        query1,
+        function (err, results) {
+            if (results) {
+                res.status(200).json(results);
+            } else {
+                res.status(400).json(err);
             }
-        )
-    }
-
+        }
+    )
 })
 route.get('/transactions', (req, res) => {
 
