@@ -108,6 +108,7 @@ route.post('/products', (req, res) => {
 route.delete('/products', (req, res) => {
     const query = 'Update product set disabled = 1 WHERE Product_ID = ?'
     console.log(req.body.Product_ID)
+    res.status(200)
     // connection.query(
     //     query,
     //     [req.body.Product_ID],
