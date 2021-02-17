@@ -31,6 +31,7 @@ route.get('/orders', (req, res) => {
 })
 route.get('/products', (req, res) => {
     const query1 = `SELECT * FROM product;`
+    console.log("Hello")
     connection.query(
         query1,
         function (err, results) {
