@@ -30,8 +30,7 @@ route.get('/orders', (req, res) => {
 
 })
 route.get('/products', (req, res) => {
-    const query1 = `SELECT * FROM product;`
-    console.log("Hello")
+    const query1 = `SELECT * FROM product where disabled = 0;`
     connection.query(
         query1,
         function (err, results) {
@@ -105,4 +104,16 @@ route.post('/products', (req, res) => {
         }
     )
 })
+
+route.delete('/products', (req, res) => {
+    const query = 'Update product set disabled = 1 WHERE Product_ID = ?'
+    connection.query(
+        query,
+        [req.body.Product_ID],
+        function (err, results) {
+            res.send(results || err);
+        }
+    )
+})
+
 exports = module.exports = { route }
