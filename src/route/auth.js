@@ -49,8 +49,8 @@ route.post('/vendor', (req, res) => {
                     [req.body.MobNo1, 0, 1],
                     function (err, results) {
                         connection.query(
-                            `Select * from user where MobNo1 = ?`
-                            [MobNo1],
+                            `Select * from user where MobNo1 = ?`,
+                            [req.body.MobNo1],
                             function (err, users) {
                                 const token = createToken(users[0]['User_ID'])
                                 err ? res.json({ message: err }) : res.json({ token: token, user: users[0] })
