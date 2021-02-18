@@ -53,7 +53,7 @@ route.get('/transactions', (req, res) => {
 })
 route.patch('/orders', (req, res) => {
     console.log(req.body)
-    const query = `UPDATE orders SET status = ?, delivery_date = STR_TO_DATE(?, "%M %d %Y") WHERE OrderId = ? and Product_ID = ?`
+    const query = `UPDATE orders SET status = ?, delivery_date = STR_TO_DATE(?, "%Y-%M-%d") WHERE OrderId = ? and Product_ID = ?`
     connection.query(
         query,
         [req.body.status, req.body.delivery_date, req.body.OrderId, req.body.Product_ID],
