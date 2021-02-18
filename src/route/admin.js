@@ -52,6 +52,7 @@ route.get('/transactions', (req, res) => {
     )
 })
 route.patch('/orders', (req, res) => {
+    console.log(req.body)
     const query = `UPDATE orders SET status = ?, delivery_date = STR_TO_DATE(?, "%M %d %Y") WHERE OrderId = ? and Product_ID = ?`
     connection.query(
         query,
@@ -74,10 +75,10 @@ route.patch('/products', (req, res) => {
 })
 
 route.patch('/customer', (req, res) => {
-    const query = `UPDATE user set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, VERIFIED =  ?, city = ? WHERE User_ID = ?;`
+    const query = `UPDATE user set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, city = ? WHERE User_ID = ?;`
     connection.query(
         query,
-        [req.body.Name, req.body.MobNo1, req.body.MobNo2, req.body.Address, req.body.VERIFIED, req.body.City, res.body.User_ID],
+        [req.body.Name, req.body.MobNo1, req.body.MobNo2, req.body.Address, req.body.City, res.body.User_ID],
         function (err, results) {
             res.send(results || err);
         }
@@ -98,7 +99,7 @@ route.post('/products', (req, res) => {
     const query = `INSERT INTO product (Vendor_ID, product_name, product_price, qty_kilos,qty_dozen, expiry_date, product_image, discount,category, disabled) VALUE (?, ?, ?, ?, ?, STR_TO_DATE(?, "%M %d %Y"), ?, ?, ?, ?);`
     connection.query(
         query,
-        [res.body.User_ID, req.body.product_name, req.body.product_price, req.body.qty_kilos, req.body.qty_dozen, req.body.expiry_date, req.body.product_image, req.body.discount, req.body.category, 'true'],
+        [res.body.Vendor_ID, req.body.product_name, req.body.product_price, req.body.qty_kilos, req.body.qty_dozen, req.body.expiry_date, req.body.product_image, req.body.discount, req.body.category, 'true'],
         function (err, results) {
             res.send(results || err)
         }
@@ -107,15 +108,14 @@ route.post('/products', (req, res) => {
 
 route.delete('/products', (req, res) => {
     const query = 'Update product set disabled = 1 WHERE Product_ID = ?'
-    console.log(req.body.Product_ID)
     res.status(200)
-    // connection.query(
-    //     query,
-    //     [req.body.Product_ID],
-    //     function (err, results) {
-    //         res.send(results || err);
-    //     }
-    // )
+    connection.query(
+        query,
+        [req.body.Product_ID],
+        function (err, results) {
+            res.send(results || err);
+        }
+    )
 })
 
 exports = module.exports = { route }
