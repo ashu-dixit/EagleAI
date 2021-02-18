@@ -97,10 +97,11 @@ route.patch('/vendor', (req, res) => {
     )
 })
 route.post('/products', (req, res) => {
+
     const query = `INSERT INTO product (Vendor_ID, product_name, product_price, qty_kilos,qty_dozen, expiry_date, product_image, discount,category, disabled) VALUE (?, ?, ?, ?, ?, STR_TO_DATE(?, "%M %d %Y"), ?, ?, ?, ?);`
     connection.query(
         query,
-        [res.body.Vendor_ID, req.body.product_name, req.body.product_price, req.body.qty_kilos, req.body.qty_dozen, req.body.expiry_date, req.body.product_image, req.body.discount, req.body.category, 'true'],
+        [req.body.Vendor_ID, req.body.product_name, req.body.product_price, req.body.qty_kilos, req.body.qty_dozen, req.body.expiry_date, req.body.product_image, req.body.discount, req.body.category, 'true'],
         function (err, results) {
             res.send(results || err)
         }
