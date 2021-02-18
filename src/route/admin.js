@@ -75,6 +75,7 @@ route.patch('/products', (req, res) => {
 })
 
 route.patch('/customer', (req, res) => {
+    console.log(req.body);
     const query = `UPDATE user set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, city = ? WHERE User_ID = ?;`
     connection.query(
         query,
