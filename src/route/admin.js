@@ -92,6 +92,7 @@ route.patch('/vendor', (req, res) => {
         [req.body.Name, req.body.MobNo1, req.body.MobNo2, req.body.Address, req.body.VERIFIED, req.body.City, req.body.deposit, req.body.Shop_Owner_name, req.body.ShopGstno, req.body.ShopPhoneno, req.body.Shop_name, req.body.latitudes, req.body.longtitude, res.body.User_ID],
         function (err, results) {
             res.send(results || err);
+            console.log(results || err)
         }
     )
 })
