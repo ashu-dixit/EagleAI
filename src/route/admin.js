@@ -64,7 +64,7 @@ route.patch('/orders', (req, res) => {
 })
 
 route.patch('/products', (req, res) => {
-    const query = `UPDATE product set Vendor_ID = ?, product_name = ?, product_price = ?, max_product_qty = ?, expiry_date =  STR_TO_DATE(?, "%Y-%m-%d"), product_image = ?, discount = ?, category = ?, WHERE Product_ID = ?;`
+    const query = `UPDATE product set Vendor_ID = ?, product_name = ?, product_price = ?, max_product_qty = ?, expiry_date =  STR_TO_DATE(?, "%Y-%m-%d"), product_image = ?, discount = ?, category = ? WHERE Product_ID = ?;`
     connection.query(
         query,
         [req.body.Vendor_ID, req.body.product_name, req.body.product_price, req.body.max_product_qty, req.body.expiry_date, req.body.product_image, req.body.discount, req.body.category, req.body.Product_ID],
