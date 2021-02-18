@@ -3,7 +3,12 @@ const JWT = require('jsonwebtoken')
 const route = require('express').Router();
 const secret = require('../../config').JWTsecret
 route.post('/customer', (req, res) => {
-    const MobNo1 = req.body.MobNo1
+    var MobNo1 = req.body.MobNo1
+    if(MobNo1.charAt(0) == '+'){
+        MobNo1 = MobNo1.substr(3)
+    }else if(MobNo1.charAt(0) == '+'){
+        MobNo1 = MobNo1.substr(1)
+    }
     connection.query(
         `Select User_ID, Name, MobNo1, MobNo2, Address, City from user where MobNo1 = ?`,
         [MobNo1],
@@ -12,7 +17,7 @@ route.post('/customer', (req, res) => {
             if (users.length == 0) {
                 connection.query(
                     `INSERT INTO user (MobNo1, VERIFIED) VALUE (?, ?);`,
-                    [req.body.MobNo1, 0],
+                    [MobNo1, 0],
                     function (err, results) {
                         if (results) {
                             connection.query(
@@ -37,7 +42,12 @@ route.post('/customer', (req, res) => {
     )
 })
 route.post('/vendor', (req, res) => {
-    const MobNo1 = req.body.MobNo1
+    var MobNo1 = req.body.MobNo1
+    if(MobNo1.charAt(0) == '+'){
+        MobNo1 = MobNo1.substr(3)
+    }else if(MobNo1.charAt(0) == '+'){
+        MobNo1 = MobNo1.substr(1)
+    }
     connection.query(
         `Select * from user where MobNo1 = ?`,
         [MobNo1],
@@ -46,11 +56,11 @@ route.post('/vendor', (req, res) => {
             if (users.length == 0) {
                 connection.query(
                     `INSERT INTO user (MobNo1, VERIFIED, isvendor) VALUE (?, ?, ?);`,
-                    [req.body.MobNo1, 0, 1],
+                    [MobNo1, 0, 1],
                     function (err, results) {
                         connection.query(
                             `Select * from user where MobNo1 = ?`,
-                            [req.body.MobNo1],
+                            [MobNo1],
                             function (err, users) {
                                 const token = createToken(users[0]['User_ID'])
                                 err ? res.json({ message: err }) : res.json({ token: token, user: users[0] })
