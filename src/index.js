@@ -10,7 +10,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(morgan('tiny')) 
 
 //refering to our static app in public folder
-app.use(express.static(path.join(__dirname, 'public/build')));
+app.use(express.static(path.join(__dirname, 'public', 'build')));
 app.use('/cart', authcheck, require('./route/cart').route)
 app.use('/products', authcheck, require('./route/products').route)
 app.use('/orders',  authcheck, require('./route/orders').route)

@@ -27,6 +27,7 @@ connection.query(
       latitudes varchar(50),
       longitude varchar(50),
       Isvendor boolean,
+      Isadmin boolean,
       UNIQUE (MobNo1),
       PRIMARY KEY (User_ID)
   )`,
