@@ -91,9 +91,9 @@ route.post('/admin', (req, res) => {
             if (users.length == 0) res.json({ message: "User does not exist" })
             if (users[0]['Isadmin'] == 1) {
                 const token = createToken(users[0]['User_ID'])
-                res.json({ token: token, user: users[0] })
+                res.json({ success: true, isVerified: 1, token: token, user: users[0] })
             } else {
-                res.json({ message: "You are not Admin" })
+                res.json({ success: true, isVerified: 0, message: "You are not Admin" })
             }
         }
     )
