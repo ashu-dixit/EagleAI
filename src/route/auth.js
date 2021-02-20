@@ -2,6 +2,7 @@ const { connection } = require('../sqldb');
 const JWT = require('jsonwebtoken')
 const route = require('express').Router();
 const secret = require('../../config').JWTsecret
+const adminPassword = require('../../config').adminPassword
 route.post('/customer', (req, res) => {
     var MobNo1 = req.body.MobNo1
     if (MobNo1.charAt(0) == '+') {
@@ -89,6 +90,7 @@ route.post('/admin', (req, res) => {
         function (error, users) {
             if (error) res.json({ message: "Server Error" })
             if (users.length == 0) res.json({ message: "User does not exist" })
+            if (req.body.password != adminPassword.password) res.json({ message: "Password Does Not match" })
             if (users[0]['Isadmin'] == 1) {
                 const token = createToken(users[0]['User_ID'])
                 res.json({ success: true, isVerified: 1, token: token, user: users[0] })

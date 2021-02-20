@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path')
 const PORT = process.env.PORT || 8080
 const authcheck = require('./route/authmiddleware').authcheck
+const authcheckadmin = require('./route/authmiddleware').authcheckadmin
+
 const morgan = require('morgan')
 const app = express();
 app.use(express.json())

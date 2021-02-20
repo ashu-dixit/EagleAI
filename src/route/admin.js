@@ -10,7 +10,8 @@ route.get('/customers/', (req, res) => {
     connection.query(query, function (err, result) { res.send(result || err) })
 })
 
-route.get('/orders', (req, res) => {
+route.get('/orders',(req, res) => {
+    console.log(req.headers);
     connection.query(
         `select status, count(*) AS c from orders group by status`,
         function (err, data) {
@@ -30,6 +31,7 @@ route.get('/orders', (req, res) => {
 
 })
 route.get('/products', (req, res) => {
+    console.log(req.headers)
     const query1 = `SELECT * FROM product where disabled = 0;`
     connection.query(
         query1,
@@ -52,7 +54,7 @@ route.get('/transactions', (req, res) => {
     )
 })
 route.patch('/orders', (req, res) => {
-    console.log(req.body)
+    console.log(req)
     const query = `UPDATE orders SET status = ?, delivery_date = STR_TO_DATE(?, "%Y-%m-%d") WHERE OrderId = ? and Product_ID = ?`
     connection.query(
         query,
@@ -75,6 +77,7 @@ route.patch('/products', (req, res) => {
 })
 
 route.patch('/customer', (req, res) => {
+    console.log(req.headers);
     const query = `UPDATE user set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, city = ? WHERE User_ID = ?;`
     connection.query(
         query,
@@ -86,7 +89,7 @@ route.patch('/customer', (req, res) => {
 })
 
 route.patch('/vendor', (req, res) => {
-    console.log(req.body);
+    console.log(req);
     const query = `UPDATE user set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, VERIFIED =  ?, city = ?, deposit = ?, Shop_Owner_name = ?, ShopGstno = ?, ShopPhoneno = ?, Shop_name = ?, latitudes = ?, longitude = ? WHERE User_ID = ?;`
     connection.query(
         query,
@@ -109,6 +112,7 @@ route.post('/products', (req, res) => {
 })
 
 route.delete('/products', (req, res) => {
+    console.log(req.headers);
     const query = 'Update product set disabled = 1 WHERE Product_ID = ?'
     res.status(200)
     connection.query(

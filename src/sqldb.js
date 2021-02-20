@@ -7,7 +7,7 @@ const connection = mysql.createConnection({
   database: db.DB_DATABASE,
   password: db.DB_PASS,
 });
-
+ 
 //vendor is also a user
 connection.query(
   `create table IF NOT EXISTS user (
