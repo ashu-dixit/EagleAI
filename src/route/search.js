@@ -5,10 +5,12 @@ const authcheck = require('./authmiddleware').authcheck
 route.get('/', (req, res) => {
     const city = req.query.city ? req.query.city : ""
     const name = req.query.name ? req.query.name : ""
-    const query = 'select * from product where product_name like ? and Vendor_ID in (Select Vendor_ID from user where city like ?)'
+    const category = req.query.category ? req.query.category : ""
+
+    const query = 'select * from product where category like ? and product_name like ? and Vendor_ID in (Select Vendor_ID from user where city like ? and )'
     connection.query(
         query,
-        ['%' + name + '%', '%' + city + '%'],
+        ['%' + category + '%', '%' + name + '%', '%' + city + '%'],
         function (err, results) {
             if (results) {
                 res.json({
@@ -22,7 +24,7 @@ route.get('/', (req, res) => {
     )
 })
 
-route.get('/store', authcheck,   (req, res) => {
+route.get('/store', authcheck, (req, res) => {
     const name = req.query.name ? req.query.name : ""
     console.log(res.locals.user + "ashu");
     const query = 'select * from product where product_name like ? and Vendor_ID = ?'

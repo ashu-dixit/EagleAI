@@ -9,6 +9,16 @@ route.get('/vendor', (req, res) => {
     res.json(res.locals.user)
 })
 
+route.get('/notification', (req, res) => {
+    connection.query(
+        'SELECT * FROM notification WHERE User_ID = ?',
+        [res.locals.user.User_ID],
+        function (err, resu) {
+            res.json(resu)
+        }
+    )
+})
+
 route.patch('/customer', (req, res) => {
     const Name = req.body.Name || res.locals.user.Name
     const MobNo1 = req.body.MobNo1 || res.locals.user.MobNo1

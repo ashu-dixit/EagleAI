@@ -7,7 +7,7 @@ const connection = mysql.createConnection({
   database: db.DB_DATABASE,
   password: db.DB_PASS,
 });
- 
+
 //vendor is also a user
 connection.query(
   `create table IF NOT EXISTS user (
@@ -90,6 +90,31 @@ connection.query(
     status VARCHAR(50) default 'Failed',  
     PRIMARY KEY (id)
   )`,
+  function (err, result) {
+    console.log(err);
+  }
+)
+
+connection.query(
+  `CREATE TABLE notification(
+    id INT NOT NULL AUTO_INCREMENT,
+    User_ID INT NOT NULL,
+    message VARCHAR(100),
+    ondate DATETIME,
+    PRIMARY KEY (id)
+  )`,
+  function (err, result) {
+    console.log(err);
+  }
+)
+
+connection.query(
+  `CREATE TRIGGER notification 
+  AFTER INSERT
+  ON orders FOR EACH ROW
+  BEGIN
+    INSERT INTO notification (message, User_ID, date) VALUES (CONCAT('Hi, You recieved a new order for product ', NEW.product_ID), NEW.User_ID, curdate());
+  END`,
   function (err, result) {
     console.log(err);
   }

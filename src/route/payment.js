@@ -42,6 +42,10 @@ route.post('/verification', (req, res) => {
                 queries.push(`delete from cart where User_ID = ?`)
                 queryValues.push([user[0]['User_ID']])
 
+                queries.push('UPDATE product JOIN cart USING (product_ID) SET product.max_product_qty = product.max_product_qty - cart.product_qty WHERE cart.User_ID = ?')
+                queryValues.push([user[0]['User_ID']])
+
+
                 try {
                     connection.beginTransaction(function (err, res) {
                         const queryPromise = []
@@ -61,9 +65,14 @@ route.post('/verification', (req, res) => {
                     })
                 } catch (err) {
                     connection.rollback(function (err, res) {
-                        console.log(err || res)
+                        connection.query(
+                            'INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)',
+                            [req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.payload.payment.entity.method, 'Debit', 'Failed'],
+                            function (error, respons) {
+                                res.json({ message: err })
+                            }
+                        )
                     })
-                    res.json({ message: err })
                 }
 
 
@@ -182,6 +191,8 @@ function checkwalet(req, res) {
                 queries.push(`update user set deposit = ? where User_ID = ?`)
                 queryValues.push([amount[0]['deposit'] - req.body.grandTotal, res.locals.user.User_ID])
 
+                queries.push('UPDATE product JOIN cart USING (product_ID) SET product.max_product_qty = product.max_product_qty - cart.product_qty WHERE cart.User_ID = ?')
+                queryValues.push([user[0]['User_ID']])
 
                 try {
                     connection.beginTransaction(function (err, res) {
