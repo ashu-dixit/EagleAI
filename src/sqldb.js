@@ -91,7 +91,7 @@ queries.push(
   AFTER INSERT ON orders
   FOR EACH ROW
   BEGIN
-    INSERT INTO notification (message, User_ID, date) VALUES (CONCAT('Hi, You recieved a new order for product ', NEW.product_ID), NEW.User_ID, curdate());
+    INSERT INTO notification (message, User_ID, ondate) VALUES (CONCAT('Hi, You recieved a new order for product ', NEW.product_ID), NEW.User_ID, curdate());
   END`
 )
 

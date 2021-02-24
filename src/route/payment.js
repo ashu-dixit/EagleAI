@@ -157,15 +157,16 @@ route.post('/razorpay', authcheck, async (req,  res) => {
 
                     queries.push(`INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`)
                     queryValues.push([order_id, shortid.generate(), 'Wallet', 'Debit', 'Success'])
-
+                    
+                    queries.push('UPDATE product JOIN cart USING (product_ID) SET product.max_product_qty = product.max_product_qty - cart.product_qty WHERE cart.User_ID = ?')
+                    queryValues.push([res.locals.user.User_ID])
+                    
                     queries.push(`delete from cart where User_ID = ?`)
                     queryValues.push([res.locals.user.User_ID])
 
                     queries.push(`update user set deposit = ? where User_ID = ?`)
                     queryValues.push([amount[0]['deposit'] - req.body.grandTotal, res.locals.user.User_ID])
 
-                    queries.push('UPDATE product JOIN cart USING (product_ID) SET product.max_product_qty = product.max_product_qty - cart.product_qty WHERE cart.User_ID = ?')
-                    queryValues.push([res.locals.user.User_ID])
 
 
 
@@ -177,6 +178,7 @@ route.post('/razorpay', authcheck, async (req,  res) => {
                             })
 
                             connection.commit(function (err, result) {
+                                console.log(err);
                                 if (result) {
                                     res.json({
                                         id: order_id,
@@ -189,16 +191,15 @@ route.post('/razorpay', authcheck, async (req,  res) => {
                                 }
 
                             })
-                            console.log(queryPromise);
                             console.log(err);
                         })
                         console.log(req.body);
                     } catch (err) {
                         connection.rollback(function (err, result) {
-                            console.log(err || result)
-                        })
-                        res.json({
-                            message: 'Failed Transaction'
+                            // console.log(err || result)
+                            res.json({
+                                message: 'Failed Transaction'
+                            })
                         })
                     }
                 } else {
