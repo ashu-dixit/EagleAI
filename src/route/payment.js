@@ -130,7 +130,7 @@ route.post('/verify', (req, res) => {
     )
 })
 
-route.post('/razorpay', authcheck, async (req, res) => {
+route.post('/razorpay', authcheck, checkwalet, async (req, res) => {
     const payment_capture = 1
     const options = {
         amount: parseInt(req.body.grandTotal) * 100,
@@ -139,133 +139,132 @@ route.post('/razorpay', authcheck, async (req, res) => {
         payment_capture
     }
     const usewallet = req.body.usewallet;
-    if (usewallet) {
-        checkwalet(req, res)
-    } else {
-        try {
-            console.log(options);
-            const response = await razorpay.orders.create(options)
-            var firstDay = new Date();
-            var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
-            console.log(nextWeek);
-            connection.query(
-                `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
-                [response.id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
-                function (err, results) {
-                    res.json({
-                        id: response.id,
-                        currency: response.currency,
-                        amount: response.amount,
-                        response: response,
-                    })
-                    console.log(results || err);
-                }
-            )
-        } catch (error) {
-            console.log(error)
-        }
+    try {
+        console.log(options);
+        const response = await razorpay.orders.create(options)
+        var firstDay = new Date();
+        var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
+        console.log(nextWeek);
+        connection.query(
+            `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
+            [response.id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
+            function (err, results) {
+                res.json({
+                    id: response.id,
+                    currency: response.currency,
+                    amount: response.amount,
+                    response: response,
+                })
+                console.log(results || err);
+            }
+        )
+    } catch (error) {
+        console.log(error)
     }
 })
 
 function checkwalet(req, res) {
-    connection.query(
-        `select deposit from user where User_ID = ?`,
-        [res.locals.user.User_ID],
-        function (err, amount) {
-            console.log(amount[0]['deposit'])
-            if (amount[0]['deposit'] > req.body.grandTotal) {
-                var firstDay = new Date();
-                var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
-                var order_id = shortid.generate()
-                var queries = []
-                var queryValues = []
-                queries.push(`INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`)
-                queryValues.push([order_id, `Pending`, nextWeek, firstDay, res.locals.user.User_ID])
+    if (usewallet) {
 
-                queries.push(`INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`)
-                queryValues.push([order_id, shortid.generate(), 'Wallet', 'Debit', 'Success'])
+        connection.query(
+            `select deposit from user where User_ID = ?`,
+            [res.locals.user.User_ID],
+            function (err, amount) {
+                console.log(amount[0]['deposit'])
+                if (amount[0]['deposit'] > req.body.grandTotal) {
+                    var firstDay = new Date();
+                    var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    var order_id = shortid.generate()
+                    var queries = []
+                    var queryValues = []
+                    queries.push(`INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`)
+                    queryValues.push([order_id, `Pending`, nextWeek, firstDay, res.locals.user.User_ID])
 
-                queries.push(`delete from cart where User_ID = ?`)
-                queryValues.push([res.locals.user.User_ID])
+                    queries.push(`INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`)
+                    queryValues.push([order_id, shortid.generate(), 'Wallet', 'Debit', 'Success'])
 
-                queries.push(`update user set deposit = ? where User_ID = ?`)
-                queryValues.push([amount[0]['deposit'] - req.body.grandTotal, res.locals.user.User_ID])
+                    queries.push(`delete from cart where User_ID = ?`)
+                    queryValues.push([res.locals.user.User_ID])
 
-                queries.push('UPDATE product JOIN cart USING (product_ID) SET product.max_product_qty = product.max_product_qty - cart.product_qty WHERE cart.User_ID = ?')
-                queryValues.push([res.locals.user.User_ID])
+                    queries.push(`update user set deposit = ? where User_ID = ?`)
+                    queryValues.push([amount[0]['deposit'] - req.body.grandTotal, res.locals.user.User_ID])
 
-                try {
-                    connection.beginTransaction(function (err, res) {
-                        const queryPromise = []
-                        queries.forEach((query, index) => {
-                            queryPromise.push(connection.query(query, queryValues[index]))
+                    queries.push('UPDATE product JOIN cart USING (product_ID) SET product.max_product_qty = product.max_product_qty - cart.product_qty WHERE cart.User_ID = ?')
+                    queryValues.push([res.locals.user.User_ID])
+
+                    try {
+                        connection.beginTransaction(function (err, res) {
+                            const queryPromise = []
+                            queries.forEach((query, index) => {
+                                queryPromise.push(connection.query(query, queryValues[index]))
+                            })
+                            connection.commit(function (err, result) {
+                                if (result) {
+                                    res.json({
+                                        id: order_id,
+                                        wallet: true
+                                    })
+                                } else {
+                                    res.json({
+                                        message: 'Failed Transaction'
+                                    })
+                                }
+
+                            })
                         })
-                        connection.commit(function (err, result) {
-                            if (result) {
-                                res.json({
-                                    id: order_id,
-                                    wallet: true
-                                })
-                            } else {
-                                res.json({
-                                    message: 'Failed Transaction'
-                                })
-                            }
-
+                    } catch (err) {
+                        connection.rollback(function (err, result) {
+                            console.log(err || result)
                         })
-                    })
-                } catch (err) {
-                    connection.rollback(function (err, result) {
-                        console.log(err || result)
-                    })
-                    res.json({
-                        message: 'Failed Transaction'
-                    })
+                        res.json({
+                            message: 'Failed Transaction'
+                        })
+                    }
+                    // connection.query(
+                    //     `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
+                    //     [order_id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
+                    //     function (err, results) {
+                    //         console.log(results || err);
+                    //     }
+                    // )
+                    // const query = `INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
+                    // connection.query(
+                    //     query,
+                    //     [order_id, shortid.generate(), req.body.type, 'Debit', 'Success'],
+                    //     function (err, results) {
+                    //         console.log(results || err);
+                    //     }
+                    // )
+                    // connection.query(
+                    //     `delete from cart where User_ID = ?`,
+                    //     [res.locals.user.User_ID],
+                    //     function (err, results) {
+                    //         console.log(results || err);
+                    //     }
+                    // )
+                    // const query2 = `UPDATE orders SET status = 'Pending' WHERE orderId = ?`
+                    // connection.query(
+                    //     query2,
+                    //     [order_id],
+                    //     function (err, results) {
+                    //         console.log(results || err);
+                    //     }
+                    // )
+                    // connection.beginTransaction
+                    // connection.query(
+                    //     `update user set deposit = ? where User_ID = ?`,
+                    //     [amount[0]['deposit'] - req.body.grandTotal, res.locals.user.User_ID],
+                    //     function (err, results) {
+                    //         console.log(results || err);
+                    //     }
+                    // )
+
+                } else {
+                    res.json({ message: "Not enough Balance in wallet" })
                 }
-                // connection.query(
-                //     `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
-                //     [order_id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
-                //     function (err, results) {
-                //         console.log(results || err);
-                //     }
-                // )
-                // const query = `INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
-                // connection.query(
-                //     query,
-                //     [order_id, shortid.generate(), req.body.type, 'Debit', 'Success'],
-                //     function (err, results) {
-                //         console.log(results || err);
-                //     }
-                // )
-                // connection.query(
-                //     `delete from cart where User_ID = ?`,
-                //     [res.locals.user.User_ID],
-                //     function (err, results) {
-                //         console.log(results || err);
-                //     }
-                // )
-                // const query2 = `UPDATE orders SET status = 'Pending' WHERE orderId = ?`
-                // connection.query(
-                //     query2,
-                //     [order_id],
-                //     function (err, results) {
-                //         console.log(results || err);
-                //     }
-                // )
-                // connection.beginTransaction
-                // connection.query(
-                //     `update user set deposit = ? where User_ID = ?`,
-                //     [amount[0]['deposit'] - req.body.grandTotal, res.locals.user.User_ID],
-                //     function (err, results) {
-                //         console.log(results || err);
-                //     }
-                // )
-
-            } else {
-                res.json({ message: "Not enough Balance in wallet" })
             }
-        }
-    )
+        )
+    }
 }
 
 exports = module.exports = { route }
