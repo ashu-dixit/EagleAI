@@ -7,7 +7,7 @@ route.get('/', (req, res) => {
     const name = req.query.name ? req.query.name : ""
     const category = req.query.category ? req.query.category : ""
 
-    const query = 'select * from product where category like ? and product_name like ? and Vendor_ID in (Select Vendor_ID from user where city like ? and )'
+    const query = 'select * from product where category like ? and product_name like ? and Vendor_ID in (Select Vendor_ID from user where city like ?)'
     connection.query(
         query,
         ['%' + category + '%', '%' + name + '%', '%' + city + '%'],
