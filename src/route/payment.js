@@ -139,8 +139,7 @@ route.post('/razorpay', authcheck, async (req,  res) => {
         payment_capture
     }
     const usewallet = req.body.usewallet;
-    console.log(res.locals);
-    if (req.body.usewallet) {
+    if (req.body.usewallet == 1) {
 
         connection.query(
             `select deposit from user where User_ID = ?`,
