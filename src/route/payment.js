@@ -169,7 +169,7 @@ route.post('/razorpay', authcheck, async (req,  res) => {
                     queryValues.push([res.locals.user.User_ID])
 
                     try {
-                        connection.beginTransaction(function (err, res) {
+                        connection.beginTransaction(function (err, resu) {
                             const queryPromise = []
                             queries.forEach((query, index) => {
                                 queryPromise.push(connection.query(query, queryValues[index]))
