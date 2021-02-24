@@ -200,8 +200,8 @@ function checkwalet(req, res) {
                         queries.forEach((query, index) => {
                             queryPromise.push(connection.query(query, queryValues[index]))
                         })
-                        connection.commit(function (err, res) {
-                            if (res) {
+                        connection.commit(function (err, result) {
+                            if (result) {
                                 res.json({
                                     id: order_id,
                                     wallet: true
