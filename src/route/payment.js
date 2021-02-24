@@ -163,7 +163,7 @@ route.post('/razorpay', authcheck, checkwalet, async (req, res) => {
     }
 })
 
-function checkwalet(req, res) {
+const checkwalet = (req, res, next) => {
     if (usewallet) {
 
         connection.query(
@@ -264,6 +264,8 @@ function checkwalet(req, res) {
                 }
             }
         )
+    }else{
+        next()
     }
 }
 
