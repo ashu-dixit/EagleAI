@@ -152,8 +152,8 @@ route.post('/razorpay', authcheck, async (req,  res) => {
                     var order_id = shortid.generate()
                     var queries = []
                     var queryValues = []
-                    // queries.push(`INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`)
-                    // queryValues.push([order_id, `Pending`, nextWeek, firstDay, res.locals.user.User_ID])
+                    queries.push(`INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`)
+                    queryValues.push([order_id, `Pending`, nextWeek, firstDay, res.locals.user.User_ID])
 
                     queries.push(`INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`)
                     queryValues.push([order_id, shortid.generate(), 'Wallet', 'Debit', 'Success'])
