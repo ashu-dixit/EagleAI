@@ -104,7 +104,7 @@ try {
     connection.commit(function (err, res) {
       console.log(res);
     })
-    console.log(queryPromise);
+    // console.log(queryPromise);
   }
   )
 } catch (err) {

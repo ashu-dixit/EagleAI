@@ -130,7 +130,7 @@ route.post('/verify', (req, res) => {
     )
 })
 
-route.post('/razorpay', authcheck, checkwalet, async (req, res) => {
+route.post('/razorpay', authcheck, async (req,  res) => {
     const payment_capture = 1
     const options = {
         amount: parseInt(req.body.grandTotal) * 100,
@@ -139,32 +139,8 @@ route.post('/razorpay', authcheck, checkwalet, async (req, res) => {
         payment_capture
     }
     const usewallet = req.body.usewallet;
-    try {
-        console.log(options);
-        const response = await razorpay.orders.create(options)
-        var firstDay = new Date();
-        var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
-        console.log(nextWeek);
-        connection.query(
-            `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
-            [response.id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
-            function (err, results) {
-                res.json({
-                    id: response.id,
-                    currency: response.currency,
-                    amount: response.amount,
-                    response: response,
-                })
-                console.log(results || err);
-            }
-        )
-    } catch (error) {
-        console.log(error)
-    }
-})
-
-const checkwalet = (req, res, next) => {
-    if (usewallet) {
+    console.log(res.locals);
+    if (req.body.usewallet) {
 
         connection.query(
             `select deposit from user where User_ID = ?`,
@@ -264,9 +240,31 @@ const checkwalet = (req, res, next) => {
                 }
             }
         )
-    }else{
-        next()
+    } else {
+        try {
+            console.log(options);
+            const response = await razorpay.orders.create(options)
+            var firstDay = new Date();
+            var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
+            console.log(nextWeek);
+            connection.query(
+                `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
+                [response.id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
+                function (err, results) {
+                    res.json({
+                        id: response.id,
+                        currency: response.currency,
+                        amount: response.amount,
+                        response: response,
+                    })
+                    console.log(results || err);
+                }
+            )
+        } catch (error) {
+            console.log(error)
+        }
     }
-}
+})
+
 
 exports = module.exports = { route }
