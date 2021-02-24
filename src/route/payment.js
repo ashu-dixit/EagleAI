@@ -192,7 +192,7 @@ function checkwalet(req, res) {
                 queryValues.push([amount[0]['deposit'] - req.body.grandTotal, res.locals.user.User_ID])
 
                 queries.push('UPDATE product JOIN cart USING (product_ID) SET product.max_product_qty = product.max_product_qty - cart.product_qty WHERE cart.User_ID = ?')
-                queryValues.push([user[0]['User_ID']])
+                queryValues.push([res.locals.user.User_ID])
 
                 try {
                     connection.beginTransaction(function (err, res) {
