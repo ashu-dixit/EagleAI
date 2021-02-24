@@ -215,8 +215,8 @@ function checkwalet(req, res) {
                         })
                     })
                 } catch (err) {
-                    connection.rollback(function (err, res) {
-                        console.log(err || res)
+                    connection.rollback(function (err, result) {
+                        console.log(err || result)
                     })
                     res.json({
                         message: 'Failed Transaction'
