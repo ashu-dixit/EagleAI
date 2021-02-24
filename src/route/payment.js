@@ -167,6 +167,8 @@ route.post('/razorpay', authcheck, async (req,  res) => {
                     queries.push('UPDATE product JOIN cart USING (product_ID) SET product.max_product_qty = product.max_product_qty - cart.product_qty WHERE cart.User_ID = ?')
                     queryValues.push([res.locals.user.User_ID])
 
+
+
                     try {
                         connection.beginTransaction(function (err, resu) {
                             const queryPromise = []
@@ -187,6 +189,8 @@ route.post('/razorpay', authcheck, async (req,  res) => {
 
                             })
                         })
+                        console.log(queryPromise);
+                        console.log(req.body);
                     } catch (err) {
                         connection.rollback(function (err, result) {
                             console.log(err || result)
@@ -195,45 +199,6 @@ route.post('/razorpay', authcheck, async (req,  res) => {
                             message: 'Failed Transaction'
                         })
                     }
-                    // connection.query(
-                    //     `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
-                    //     [order_id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
-                    //     function (err, results) {
-                    //         console.log(results || err);
-                    //     }
-                    // )
-                    // const query = `INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
-                    // connection.query(
-                    //     query,
-                    //     [order_id, shortid.generate(), req.body.type, 'Debit', 'Success'],
-                    //     function (err, results) {
-                    //         console.log(results || err);
-                    //     }
-                    // )
-                    // connection.query(
-                    //     `delete from cart where User_ID = ?`,
-                    //     [res.locals.user.User_ID],
-                    //     function (err, results) {
-                    //         console.log(results || err);
-                    //     }
-                    // )
-                    // const query2 = `UPDATE orders SET status = 'Pending' WHERE orderId = ?`
-                    // connection.query(
-                    //     query2,
-                    //     [order_id],
-                    //     function (err, results) {
-                    //         console.log(results || err);
-                    //     }
-                    // )
-                    // connection.beginTransaction
-                    // connection.query(
-                    //     `update user set deposit = ? where User_ID = ?`,
-                    //     [amount[0]['deposit'] - req.body.grandTotal, res.locals.user.User_ID],
-                    //     function (err, results) {
-                    //         console.log(results || err);
-                    //     }
-                    // )
-
                 } else {
                     res.json({ message: "Not enough Balance in wallet" })
                 }
