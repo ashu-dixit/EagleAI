@@ -42,4 +42,14 @@ route.get('/', (req, res) => {
         }
     )
 })
+
+route.get('/track', (req, res) => {
+    connection.query(
+        'SELECT * transaction where orderID = ?',
+        [req.body.orderID],
+        function (err, result) {
+            res.send(result[0]);
+        }
+    )
+})
 exports = module.exports = { route }

@@ -74,40 +74,20 @@ route.post('/verification', (req, res) => {
                         )
                     })
                 }
-
-
-                // const query = `INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`
-                // const query2 = `UPDATE orders SET status = 'Awaiting Fulfillment' WHERE orderId = ?`
-                // connection.query(
-                //     query,
-                //     [req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.payload.payment.entity.method, 'Debit', 'Success'],
-                //     function (err, results) {
-                //         console.log(results || err);
-                //     }
-                // )
-                // connection.query(
-                //     `delete from cart where User_ID = ?`,
-                //     [user[0]['User_ID']],
-                //     function (err, results) {
-                //         console.log(results || err);
-                //     }
-                // )
-                // connection.query(
-                //     query2,
-                //     [req.body.payload.payment.entity.order_id],
-                //     function (err, results) {
-                //         console.log(results || err);
-                //         res.json({ status: 'ok' })
-                //     }
-                // )
             }
         )
     } else {
         connection.query(
-            `delete from orders where orderId = ?`,
+            `DELETE FROM orders where orderId = ?`,
             [req.body.payload.payment.entity.order_id],
             function (err, results) {
-                console.log(results);
+                connection.query(
+                    'INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)',
+                    [req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.payload.payment.entity.method, 'Debit', 'Failed'],
+                    function (error, respons) {
+                        res.json({ message: err })
+                    }
+                )
                 res.json({ status: 'ok' })
             }
         )
@@ -130,7 +110,7 @@ route.post('/verify', (req, res) => {
     )
 })
 
-route.post('/razorpay', authcheck, async (req,  res) => {
+route.post('/razorpay', authcheck, async (req, res) => {
     const payment_capture = 1
     const options = {
         amount: parseInt(req.body.grandTotal) * 100,
@@ -152,23 +132,21 @@ route.post('/razorpay', authcheck, async (req,  res) => {
                     var order_id = shortid.generate()
                     var queries = []
                     var queryValues = []
+
                     queries.push(`INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`)
                     queryValues.push([order_id, `Pending`, nextWeek, firstDay, res.locals.user.User_ID])
 
                     queries.push(`INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`)
                     queryValues.push([order_id, shortid.generate(), 'Wallet', 'Debit', 'Success'])
-                    
+
                     queries.push('UPDATE product JOIN cart USING (product_ID) SET product.max_product_qty = product.max_product_qty - cart.product_qty WHERE cart.User_ID = ?')
                     queryValues.push([res.locals.user.User_ID])
-                    
-                    queries.push(`delete from cart where User_ID = ?`)
+
+                    queries.push(`DELETE FROM cart WHERE User_ID = ?`)
                     queryValues.push([res.locals.user.User_ID])
 
-                    queries.push(`update user set deposit = ? where User_ID = ?`)
+                    queries.push(`UPDATE user SET deposit = ? WHERE User_ID = ?`)
                     queryValues.push([amount[0]['deposit'] - req.body.grandTotal, res.locals.user.User_ID])
-
-
-
 
                     try {
                         connection.beginTransaction(function (err, resu) {
@@ -180,6 +158,7 @@ route.post('/razorpay', authcheck, async (req,  res) => {
                             connection.commit(function (err, result) {
                                 console.log(err);
                                 if (result) {
+
                                     res.json({
                                         id: order_id,
                                         wallet: true
@@ -189,11 +168,8 @@ route.post('/razorpay', authcheck, async (req,  res) => {
                                         message: 'Failed Transaction'
                                     })
                                 }
-
                             })
-                            console.log(err);
                         })
-                        console.log(req.body);
                     } catch (err) {
                         connection.rollback(function (err, result) {
                             // console.log(err || result)

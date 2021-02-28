@@ -46,4 +46,8 @@ route.patch('/vendor', (req, res) => {
         }
     )
 })
+
+route.get('/transaction', () => {
+    connection.query('SELECT ')
+})
 exports = module.exports = { route }

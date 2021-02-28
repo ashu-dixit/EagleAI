@@ -1,5 +1,7 @@
 const route = require('express').Router()
 const connection = require('../sqldb').connection
+const shortid = require('shortid')
+
 
 route.get('/vendors/', (req, res) => {
     const query = `Select User_ID, Name, MobNo1, MobNo2, VERIFIED, LastLogin, deposit, Shop_Owner_name, ShopGstno, ShopPhoneno, Shop_name, latitudes, longitude from user where VERIFIED = 1`
@@ -10,7 +12,7 @@ route.get('/customers/', (req, res) => {
     connection.query(query, function (err, result) { res.send(result || err) })
 })
 
-route.get('/orders',(req, res) => {
+route.get('/orders', (req, res) => {
     console.log(req.headers);
     connection.query(
         `select status, count(*) AS c from orders group by status`,
@@ -47,7 +49,7 @@ route.get('/products', (req, res) => {
 route.get('/transactions', (req, res) => {
 
     connection.query(
-        `Select * from transaction where status <> 'Failed'`,
+        `Select * from transaction`,
         function (err, data) {
             res.json(data || err)
         }
@@ -90,15 +92,37 @@ route.patch('/customer', (req, res) => {
 
 route.patch('/vendor', (req, res) => {
     console.log(req);
-    const query = `UPDATE user set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, VERIFIED =  ?, city = ?, deposit = ?, Shop_Owner_name = ?, ShopGstno = ?, ShopPhoneno = ?, Shop_name = ?, latitudes = ?, longitude = ? WHERE User_ID = ?;`
-    connection.query(
-        query,
-        [req.body.Name, req.body.MobNo1, req.body.MobNo2, req.body.Address, req.body.VERIFIED, req.body.City, req.body.deposit, req.body.Shop_Owner_name, req.body.ShopGstno, req.body.ShopPhoneno, req.body.Shop_name, req.body.latitudes, req.body.longitude, req.body.User_ID],
-        function (err, results) {
-            res.send(results || err);
-            console.log(results || err)
-        }
-    )
+    if (req.body.deposit != res.locals.user.deposit) {
+        connection.query('INSERT INTO TRANSACTION (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)',
+            [order_id, shortid.generate(), 'Wallet', 'Credit', 'Success'],
+            function (error, results) {
+                if (error) {
+                    res.send('Unable to complete transaction')
+                    return
+                } else {
+                    const query = `UPDATE user set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, VERIFIED =  ?, city = ?, deposit = ?, Shop_Owner_name = ?, ShopGstno = ?, ShopPhoneno = ?, Shop_name = ?, latitudes = ?, longitude = ? WHERE User_ID = ?;`
+                    connection.query(
+                        query,
+                        [req.body.Name, req.body.MobNo1, req.body.MobNo2, req.body.Address, req.body.VERIFIED, req.body.City, req.body.deposit, req.body.Shop_Owner_name, req.body.ShopGstno, req.body.ShopPhoneno, req.body.Shop_name, req.body.latitudes, req.body.longitude, req.body.User_ID],
+                        function (err, results) {
+                            res.send(results || err);
+                            console.log(results || err)
+                        }
+                    )
+                }
+            }
+        )
+    } else {
+        const query = `UPDATE user set Name = ?, MobNo1 = ?, MobNo2 = ?, Address = ?, VERIFIED =  ?, city = ?, deposit = ?, Shop_Owner_name = ?, ShopGstno = ?, ShopPhoneno = ?, Shop_name = ?, latitudes = ?, longitude = ? WHERE User_ID = ?;`
+        connection.query(
+            query,
+            [req.body.Name, req.body.MobNo1, req.body.MobNo2, req.body.Address, req.body.VERIFIED, req.body.City, req.body.deposit, req.body.Shop_Owner_name, req.body.ShopGstno, req.body.ShopPhoneno, req.body.Shop_name, req.body.latitudes, req.body.longitude, req.body.User_ID],
+            function (err, results) {
+                res.send(results || err);
+                console.log(results || err)
+            }
+        )
+    }
 })
 route.post('/products', (req, res) => {
     const query = `INSERT INTO product (Vendor_ID, product_name, product_price, max_product_qty, expiry_date, product_image, discount, category, disabled) VALUE (?, ?, ?, ?, STR_TO_DATE(?, "%Y-%m-%d"), ?, ?, ?, ?);`
