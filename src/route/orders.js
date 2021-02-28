@@ -2,7 +2,7 @@ const route = require('express').Router()
 const connection = require('../sqldb').connection
 route.get('/', (req, res) => {
     const query = `select * 
-    from (SELECT * FROM orders WHERE User_ID = ?) X
+    FROM (SELECT * FROM orders WHERE User_ID = ?) X
     INNER JOIN product
     ON product.Product_ID = X.Product_ID
     WHERE order_date <= now() - INTERVAL ? DAY
