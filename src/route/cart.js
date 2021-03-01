@@ -71,10 +71,21 @@ route.get('/', (req, res) => {
 route.patch('/', (req, res) => {
     const query = 'Update `cart` set product_qty = ? WHERE User_ID = ? AND Product_ID = ?'
     connection.query(
-        query,
-        [req.body.product_qty, res.locals.user.User_ID, req.body.Product_ID],
-        function (err, results) {
-            res.send(results || err)
+        'SELECT max_product_qty FROM product where Product_ID = ?',
+        [req.body.Product_ID],
+        function(er, re){
+            if(er) res.json({message: err})
+            else if(re[0] > req.body.product_qty){
+                connection.query(
+                    query,
+                    [req.body.product_qty, res.locals.user.User_ID, req.body.Product_ID],
+                    function (err, results) {
+                        res.send(results || err)
+                    }
+                )
+            }else{
+                res.json({message: 'Qty no available'})
+            }
         }
     )
 })

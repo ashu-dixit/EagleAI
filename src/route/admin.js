@@ -4,7 +4,7 @@ const shortid = require('shortid')
 
 
 route.get('/vendors/', (req, res) => {
-    const query = `Select User_ID, Name, MobNo1, MobNo2, VERIFIED, LastLogin, deposit, Shop_Owner_name, ShopGstno, ShopPhoneno, Shop_name, latitudes, longitude from user where VERIFIED = 1`
+    const query = `Select User_ID, Name, MobNo1, MobNo2, VERIFIED, LastLogin, deposit, Shop_Owner_name, ShopGstno, ShopPhoneno, Shop_name, latitudes, longitude from user`
     connection.query(query, function (err, result) { res.send(result || err) })
 })
 route.get('/customers/', (req, res) => {

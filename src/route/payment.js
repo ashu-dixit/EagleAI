@@ -119,6 +119,15 @@ route.post('/razorpay', authcheck, async (req, res) => {
         payment_capture
     }
     const usewallet = req.body.usewallet;
+    connection.query(
+        'SELECT Product_name, Product_ID from product join cart using(Product_ID) where user_ID = ? AND cart.product_qty > product.max_product_qty',
+        [ res.locals.user.User_ID],
+        function (err, re){
+            if(re.length != 0){
+                res.json({message: "qty not available", products: re})
+            }
+        }
+    )
     if (req.body.usewallet == 1) {
 
         connection.query(
