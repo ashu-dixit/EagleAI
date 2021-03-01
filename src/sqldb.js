@@ -94,6 +94,31 @@ queries.push(
     INSERT INTO notification (message, User_ID, ondate) VALUES (CONCAT('Hi, You recieved a new order for product ', NEW.product_ID), NEW.User_ID, curdate());
   END`
 )
+queries.push(
+  `CREATE TABLE IF NOT EXISTS statement(
+    id INT NOT NULL AUTO_INCREMENT,
+    User_ID INT NOT NULL,
+    type VARCHAR(50),
+    amount INT NOT NULL DEFAULT 0,
+    ondate DATETIME,
+    PRIMARY KEY (id)
+  )`
+)
+queries.push(`drop trigger if exists wallet_trigger`)
+queries.push(
+  `CREATE TRIGGER wallet_trigger 
+  AFTER UPDATE ON user 
+  FOR EACH ROW
+  BEGIN
+    IF NEW.deposit <> OLD.deposit THEN
+      IF NEW.deposit > OLD.deposit THEN
+      INSERT INTO statement (User_ID, type, amount, onDate) VALUES (NEW.User_ID, 'DEBIT', NEW.deposit - OLD.deposit, curdate());
+      ELSE
+      INSERT INTO statement (User_ID, type, amount, onDate) VALUES (NEW.User_ID, 'CREDIT', OLD.deposit - NEW.deposit, curdate());
+      END IF;
+    END IF;
+  END`
+)
 
 try {
   connection.beginTransaction(function (err, res) {
@@ -104,7 +129,6 @@ try {
     connection.commit(function (err, res) {
       console.log(res);
     })
-    // console.log(queryPromise);
   }
   )
 } catch (err) {
