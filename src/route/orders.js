@@ -27,6 +27,12 @@ route.get('/', (req, res) => {
                     )
                     console.log(orderdetails);
             })
+            if(orders.length == 0){
+                res.json({
+                    TotalOrders: orders.length,
+                    orders: orderdetails
+                })
+            }
         }
     )
 })
