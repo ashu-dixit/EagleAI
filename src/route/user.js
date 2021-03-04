@@ -51,8 +51,8 @@ route.get('/statement', (req, res) => {
     connection.query(
         'SELECT * from statement where User_ID = ?',
         [res.locals.user.User_ID],
-        function (err, result){
-            res.send({result})
+        function (err, result) {
+            res.send({ Entries: result })
         }
     )
 })

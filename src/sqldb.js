@@ -52,17 +52,23 @@ queries.push(
     product_qty INT NOT NULL, 
     primary key(Product_ID, User_ID)
 )`)
-
 queries.push(
-  `Create table IF NOT EXISTS orders (
+  `CREATE TABLE IF NOT EXISTS \`order\` (
     orderID VARCHAR(50) NOT NULL,
     User_ID INT NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    order_date DATETIME NOT NULL,
+    delivery_date DATETIME NOT NULL,
+    PRIMARY KEY(orderID)
+    )`
+)
+queries.push(
+  `Create table IF NOT EXISTS order_item ( 
+    id INT NOT NULL auto_increment,
+    orderID VARCHAR(50) NOT NULL,
     Product_ID BIGINT NOT NULL,
     product_qty INT NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    delivery_date DATETIME NOT NULL,
-    order_date DATETIME NOT NULL,
-    PRIMARY KEY (orderID, User_ID, Product_ID)
+    PRIMARY KEY (id)
 )`
 )
 queries.push(
@@ -75,24 +81,6 @@ queries.push(
     status VARCHAR(50) default 'Failed',  
     PRIMARY KEY (id)
   )`
-)
-queries.push(
-  `CREATE TABLE IF NOT EXISTS notification(
-    id INT NOT NULL AUTO_INCREMENT,
-    User_ID INT NOT NULL,
-    message VARCHAR(100),
-    ondate DATETIME,
-    PRIMARY KEY (id)
-  )`
-)
-queries.push(`drop trigger if exists notification_trigger`)
-queries.push(
-  `CREATE TRIGGER notification_trigger 
-  AFTER INSERT ON orders
-  FOR EACH ROW
-  BEGIN
-    INSERT INTO notification (message, User_ID, ondate) VALUES (CONCAT('Hi, You recieved a new order for product ', NEW.product_ID), NEW.User_ID, curdate());
-  END`
 )
 queries.push(
   `CREATE TABLE IF NOT EXISTS statement(

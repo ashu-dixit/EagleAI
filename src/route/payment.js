@@ -28,7 +28,7 @@ route.post('/verification', (req, res) => {
 
         console.log(req.body.payload.payment.entity)
         connection.query(
-            'select User_ID from orders where orderID = ?',
+            'select User_ID from order where orderID = ?',
             [req.body.payload.payment.entity.order_id],
             function (err, user) {
                 var queries = []
@@ -36,7 +36,7 @@ route.post('/verification', (req, res) => {
                 queries.push(`INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`)
                 queryValues.push([req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.payload.payment.entity.method, 'Debit', 'Success'])
 
-                queries.push(`UPDATE orders SET status = 'Pending' WHERE orderId = ?`)
+                queries.push(`UPDATE order SET status = 'Pending' WHERE orderId = ?`)
                 queryValues.push([req.body.payload.payment.entity.order_id])
 
                 queries.push(`delete from cart where User_ID = ?`)
@@ -77,20 +77,36 @@ route.post('/verification', (req, res) => {
             }
         )
     } else {
-        connection.query(
-            `DELETE FROM orders where orderId = ?`,
-            [req.body.payload.payment.entity.order_id],
-            function (err, results) {
-                connection.query(
-                    'INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)',
-                    [req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.payload.payment.entity.method, 'Debit', 'Failed'],
-                    function (error, respons) {
-                        res.json({ message: err })
-                    }
-                )
+
+        var queries = []
+        var queryValues = []
+
+        queries.push(`DELETE FROM order where orderId = ?`)
+        queryValues.push([req.body.payload.payment.entity.order_id])
+
+        queries.push(`DELETE FROM order_item where orderId = ?`)
+        queryValues.push([req.body.payload.payment.entity.order_id])
+
+        queries.push('INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)')
+        queryValues.push([req.body.payload.payment.entity.order_id, req.body.payload.payment.entity.id, req.body.payload.payment.entity.method, 'Debit', 'Failed'])
+
+        try {
+            connection.beginTransaction(function (err, resu) {
+                const queryPromise = []
+                queries.forEach((query, index) => {
+                    queryPromise.push(connection.query(query, queryValues[index]))
+                })
+
+                connection.commit(function (err, result) {
+                    console.log(err);
+                    res.json({ status: 'ok' })
+                })
+            })
+        } catch (err) {
+            connection.rollback(function (err, result) {
                 res.json({ status: 'ok' })
-            }
-        )
+            })
+        }
     }
 })
 
@@ -121,15 +137,14 @@ route.post('/razorpay', authcheck, async (req, res) => {
     const usewallet = req.body.usewallet;
     connection.query(
         'SELECT Product_name, Product_ID from product join cart using(Product_ID) where user_ID = ? AND cart.product_qty > product.max_product_qty',
-        [ res.locals.user.User_ID],
-        function (err, re){
-            if(re.length != 0){
-                res.json({message: "qty not available", products: re})
+        [res.locals.user.User_ID],
+        function (err, re) {
+            if (re.length != 0) {
+                res.json({ message: "qty not available", products: re })
             }
         }
     )
     if (req.body.usewallet == 1) {
-
         connection.query(
             `select deposit from user where User_ID = ?`,
             [res.locals.user.User_ID],
@@ -137,13 +152,16 @@ route.post('/razorpay', authcheck, async (req, res) => {
                 console.log(amount[0]['deposit'])
                 if (amount[0]['deposit'] > req.body.grandTotal) {
                     var firstDay = new Date();
-                    var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    var nextWeek = new Date(firstDay.getTime() + 7 * 24 * 60 * 60 * 1000);
                     var order_id = shortid.generate()
                     var queries = []
                     var queryValues = []
 
-                    queries.push(`INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`)
-                    queryValues.push([order_id, `Pending`, nextWeek, firstDay, res.locals.user.User_ID])
+                    queries.push(`INSERT INTO \`order\` (orderId, User_ID, status, delivery_date, order_date) VALUE (?, ?, ?, DATE(?), DATE(?))`)
+                    queryValues.push([order_id, res.locals.user.User_ID, `Pending`, nextWeek, firstDay])
+
+                    queries.push(`INSERT INTO order_item (orderId, Product_ID, Product_qty) SELECT ?, product_ID, product_qty from cart where User_ID = ?`)
+                    queryValues.push([order_id, res.locals.user.User_ID])
 
                     queries.push(`INSERT INTO transaction (OrderID, payment_ID, type, mode, status) VALUE (?,?,?,?,?)`)
                     queryValues.push([order_id, shortid.generate(), 'Wallet', 'Debit', 'Success'])
@@ -181,7 +199,6 @@ route.post('/razorpay', authcheck, async (req, res) => {
                         })
                     } catch (err) {
                         connection.rollback(function (err, result) {
-                            // console.log(err || result)
                             res.json({
                                 message: 'Failed Transaction'
                             })
@@ -197,23 +214,50 @@ route.post('/razorpay', authcheck, async (req, res) => {
             console.log(options);
             const response = await razorpay.orders.create(options)
             var firstDay = new Date();
-            var nextWeek = new Date(firstDay.getTime() - 7 * 24 * 60 * 60 * 1000);
+            var nextWeek = new Date(firstDay.getTime() + 7 * 24 * 60 * 60 * 1000);
+            var order_id = response.id
             console.log(nextWeek);
-            connection.query(
-                `INSERT INTO orders (orderId, User_ID, Product_ID, product_qty, status, delivery_date, order_date) SELECT ?, User_ID,  Product_ID, product_qty, ?, DATE(?), DATE(?) FROM cart WHERE User_ID = ?;`,
-                [response.id, `Awaiting Payment`, nextWeek, firstDay, res.locals.user.User_ID],
-                function (err, results) {
-                    res.json({
-                        id: response.id,
-                        currency: response.currency,
-                        amount: response.amount,
-                        response: response,
-                    })
-                    console.log(results || err);
-                }
-            )
+            var queries = []
+            var queryValues = []
+
+            queries.push(`INSERT INTO \`order\` (orderId, User_ID, status, delivery_date, order_date) VALUE (?, ?, ?, DATE(?), DATE(?) )`)
+            queryValues.push([order_id, res.locals.user.User_ID, `Awaiting Payment`, nextWeek, firstDay])
+
+            queries.push(`INSERT INTO order_item (orderId, Product_ID, Product_qty) SELECT ?, product_ID, product_qty from cart where User_ID = ?`)
+            queryValues.push([order_id, res.locals.user.User_ID])
+
+            connection.beginTransaction(function (err, resu) {
+                const queryPromise = []
+                queries.forEach((query, index) => {
+                    queryPromise.push(connection.query(query, queryValues[index]))
+                })
+
+                connection.commit(function (err, result) {
+                    console.log(err);
+                    if (result) {
+
+                        res.json({
+                            id: response.id,
+                            currency: response.currency,
+                            amount: response.amount,
+                            response: response,
+                        })
+                        console.log(results || err);
+                    } else {
+                        res.json({
+                            message: 'Failed Transaction'
+                        })
+                    }
+                })
+            })
+
         } catch (error) {
-            console.log(error)
+            connection.rollback(function (err, result) {
+                // console.log(err || result)
+                res.json({
+                    message: 'Failed Transaction'
+                })
+            })
         }
     }
 })
