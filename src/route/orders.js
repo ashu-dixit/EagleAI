@@ -16,6 +16,7 @@ route.get('/', (req, res) => {
                     [field.orderID],
                     function (err, products) {
                         newfield.products = products
+                        console.log(products);
                         orderdetails.push(newfield)
                         if(index == orders.length - 1){
                             res.json({

@@ -144,6 +144,7 @@ route.post('/razorpay', authcheck, async (req, res) => {
             }
         }
     )
+    // select SUM(product_qty*product_price) AS granTotal from product INNER JOIN (SELECT * CART where user_ID = ?) AS C Using Product_ID
     if (req.body.usewallet == 1) {
         connection.query(
             `select deposit from user where User_ID = ?`,
