@@ -18,7 +18,7 @@ queries.push(`create table IF NOT EXISTS user (
   VERIFIED boolean,
   City varchar(100),
   LastLogin datetime,
-  deposit INT,
+  deposit float,
   Shop_Owner_name varchar(50),
   ShopGstno varchar(50),
   ShopPhoneno varchar(50),
@@ -87,7 +87,8 @@ queries.push(
     id INT NOT NULL AUTO_INCREMENT,
     User_ID INT NOT NULL,
     type VARCHAR(50),
-    amount INT NOT NULL DEFAULT 0,
+    amount FLOAT NOT NULL DEFAULT 0.0,
+    newamount FLOAT NOT NULL,
     ondate DATETIME,
     PRIMARY KEY (id)
   )`
@@ -99,10 +100,10 @@ queries.push(
   FOR EACH ROW
   BEGIN
     IF NEW.deposit <> OLD.deposit THEN
-      IF NEW.deposit > OLD.deposit THEN
-      INSERT INTO statement (User_ID, type, amount, onDate) VALUES (NEW.User_ID, 'DEBIT', NEW.deposit - OLD.deposit, curdate());
+      IF NEW.deposit < OLD.deposit THEN
+      INSERT INTO statement (User_ID, type, amount,newamount, onDate) VALUES (NEW.User_ID, 'DEBIT', OLD.deposit - NEW.deposit, NEW.deposit, curdate());
       ELSE
-      INSERT INTO statement (User_ID, type, amount, onDate) VALUES (NEW.User_ID, 'CREDIT', OLD.deposit - NEW.deposit, curdate());
+      INSERT INTO statement (User_ID, type, amount, newamount, onDate) VALUES (NEW.User_ID, 'CREDIT', NEW.deposit - OLD.deposit, NEW.deposit, curdate());
       END IF;
     END IF;
   END`

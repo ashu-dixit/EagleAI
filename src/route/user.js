@@ -56,4 +56,14 @@ route.get('/statement', (req, res) => {
         }
     )
 })
+
+route.get('/transaction', (req, res) => {
+    connection.query(
+        'SELECT * FROM transaction WHERE OrderID = ?',
+        [req.body.OrderID],
+        function (err, result) {
+            res.send({ Entries: result })
+        }
+    )
+})
 exports = module.exports = { route }
