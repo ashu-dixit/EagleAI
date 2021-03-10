@@ -12,7 +12,7 @@ route.get('/', (req, res) => {
             orders.forEach((field, index) => {
                 var newfield = new Object(field);
                 connection.query(
-                    'SELECT * from product where product_ID in (select product_ID from order_item where orderID = ?)',
+                    'SELECT * from product INNER JOIN (select * from order_item where orderID = ?) as A USING(product_ID)',
                     [field.orderID],
                     function (err, products) {
                         newfield.products = products
